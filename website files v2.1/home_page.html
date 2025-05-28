@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Blast!</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(255, 255, 255);
+            transition: background-color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #292727;
+        }
+
+        .my-button {
+            background-color: #aa483b;
+            color: white;
+            padding: 15px 32px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .my-button:hover {
+            background-color: #aa483b;
+        }
+
+        .logo {
+            width: 200px; /* Adjust size as needed */
+            margin-bottom: 20px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Hamburger Menu Styles */
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 999;
+            transition: top 0.5s;
+        }
+
+        .sidebar.open + .menu-icon {
+            top: 300px;
+        }
+
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        /* Animation for hamburger to X */
+        .change div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .change div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .change div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        .dark-mode .theme-toggle {
+            background-color: #464545;
+            color: white;
+        }
+        .theme-toggle.dark-mode {
+            background-color: #666666; /* Dark background for dark mode */
+            border-radius: 50%; /* Optional: make it circular */
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Dark Mode Toggle and Icon -->
+    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
+        <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
+    </button>
+    <!-- Hamburger Menu Icon -->
+    <div class="menu-icon" onclick="toggleMenu(this)">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+<!-- Title and Logo-->
+    <img src="logolm.png" class="logo" style="width: 450px; margin-top: -100px;" id="logo">
+    
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="#">Home</a>
+        <a href="#">Profile</a>
+        <a href="#">Leaderboard</a>
+        <a href="#">Settings</a>
+        <a href="#">Help</a>
+    </div>
+
+    <button class="my-button" onclick="myFunction()">Play</button>
+    <button class="my-button" onclick="myFunction2()">Categories</button>
+
+    <script>
+        function toggleMenu(element) {
+            element.classList.toggle("change");
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.classList.toggle("open");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.querySelector('.menu-icon').classList.remove("change");
+        }
+
+        // Close sidebar when clicking outside
+        window.onclick = function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const menuIcon = document.querySelector('.menu-icon');
+            if (event.target !== sidebar && event.target !== menuIcon && !menuIcon.contains(event.target)) {
+                sidebar.style.width = "0";
+                menuIcon.classList.remove("change");
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const logo = document.getElementById('logo');
+            const themeToggle = document.getElementById('themeToggle');
+
+            if (document.body.classList.contains('dark-mode')) {
+                logo.src = "logodm.png";
+                themeToggle.classList.add('dark-mode'); // Add class for dark mode
+            } else {
+                logo.src = "logolm.png";
+                themeToggle.classList.remove('dark-mode'); // Remove class for light mode
+            }
+        }
+    </script>
+</body>
+</html>
