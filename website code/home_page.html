@@ -240,6 +240,103 @@
             background-size: 300% 300%;
             box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
         }
+
+        /* Category Button Styles */
+        .categories-container {
+            position: relative; /* Essential for dropdown positioning */
+            display: inline-block; /* Allows it to sit next to other inline-block elements */
+            margin-top: 0px; /* Adjusted spacing to move it closer to the play button */
+        }
+
+        .category-button {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            color: white;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0; /* Initial opacity for fade-in animation */
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite; /* Same animation as play button */
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+
+        .category-button:hover {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
+        }
+
+        .category-options {
+            display: none; /* Hidden by default */
+            position: absolute;
+            background-color: #f9f9f9; /* Dropdown background */
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden; /* Ensures rounded corners are applied */
+            left: 50%; /* Center the dropdown below the button */
+            transform: translateX(-50%); /* Adjust for centering */
+            top: calc(100% + 10px); /* Position below the button with some spacing */
+        }
+
+        .category-options.active {
+            display: block; /* Show when active */
+            animation: fadein 0.3s ease-out forwards; /* Added fade-in animation */
+        }
+
+        .category-option {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: none; /* Remove gradient for individual options */
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .category-option:hover {
+            background-color: #ddd; /* Hover effect for dropdown items */
+            transform: none; /* Remove previous scale effect */
+            box-shadow: none; /* Remove previous box shadow */
+        }
+
+        /* Dark Mode for Category Buttons */
+        body.dark-mode .category-button {
+            background: linear-gradient(90deg, #3a3a4a, #2d2d3a, #3a2d2d, #3a3a4a);
+            background-size: 300% 300%;
+            animation: buttonGradientMove 6s ease-in-out infinite; /* Re-apply gradient animation */
+            color: #fff;
+        }
+        body.dark-mode .category-button:hover {
+            background: linear-gradient(90deg, #2d2d3a, #3a2d2d, #3a3a4a, #2d2d3a);
+            background-size: 300% 300%;
+        }
+        body.dark-mode .category-options {
+            background-color: #333;
+        }
+        body.dark-mode .category-option {
+            color: white;
+        }
+        body.dark-mode .category-option:hover {
+            background-color: #555;
+        }
+
+        @keyframes fadein {
+            from { opacity: 0; transform: translateX(-50%); }
+            to { opacity: 1; transform: translateX(-50%); }
+        }
     </style>
 </head>
 <body>
@@ -270,7 +367,13 @@
         <a href="#">Help</a>
     </div>
     <button class="my-animated-button">play</button>
-    <button class="my-animated-button">categories</button>
+    <div class="categories-container">
+        <button class="category-button" id="categoriesButton" onclick="toggleCategories()">categories</button>
+        <div class="category-options" id="categoryOptions">
+            <button class="category-option" onclick="selectCategory('movies')">Movies</button>
+            <button class="category-option" onclick="selectCategory('pop-culture')">Pop Culture</button>
+        </div>
+    </div>
 
     <script>
         function toggleMenu(element) {
@@ -289,9 +392,16 @@
         window.onclick = function(event) {
             const sidebar = document.getElementById("mySidebar");
             const menuIcon = document.querySelector('.menu-icon');
+            const categoriesContainer = document.querySelector('.categories-container');
+
             if (event.target !== sidebar && event.target !== menuIcon && !menuIcon.contains(event.target)) {
                 sidebar.style.width = "0";
                 menuIcon.classList.remove("change");
+            }
+            
+            // Close category dropdown if click is outside
+            if (event.target !== categoriesContainer && !categoriesContainer.contains(event.target)) {
+                document.getElementById('categoryOptions').classList.remove('active');
             }
         }
 
@@ -306,6 +416,30 @@
                 if (logo) logo.src = "logolm.png";
                 themeToggle.classList.remove('dark-mode');
             }
+        }
+
+        function toggleCategories() {
+            const options = document.getElementById('categoryOptions');
+            options.classList.toggle('active');
+        }
+
+        function selectCategory(category) {
+            // Store the selected category (optional, if you need it elsewhere)
+            localStorage.setItem('selectedCategory', category);
+            
+            const button = document.getElementById('categoriesButton');
+            button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            
+            // Hide the dropdown after selection
+            document.getElementById('categoryOptions').classList.remove('active');
+        }
+
+        // On page load, ensure button says 'categories'
+        window.onload = function() {
+            const button = document.getElementById('categoriesButton');
+            button.textContent = 'categories';
+            // Clear any previously saved category to ensure it always starts with 'categories'
+            localStorage.removeItem('selectedCategory');
         }
     </script>
 </body>
