@@ -234,8 +234,9 @@
             font-weight: bold;
             opacity: 0;
             animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
-            transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            transition: background 0.6s cubic-bezier(.4,0,.2,1), color 0.6s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
             box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+            text-align: center;
         }
         @keyframes fadeInButton {
             from { opacity: 0; transform: translateY(40px) scale(0.98); }
@@ -490,6 +491,15 @@
         body.faded-in #main-content {
             opacity: 1;
         }
+        /* Pop animation for correct answer */
+        .correct-animate {
+            animation: correctPop 0.35s cubic-bezier(.23,1.01,.32,1);
+        }
+        @keyframes correctPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
     </style>
     <script>
       (function() {
@@ -532,6 +542,7 @@
     <div id="trivia-container">
         <h2 id="category-title" style="margin-bottom: 8px; font-size: 2.2rem; letter-spacing: 1px;"></h2>
         <div id="progress" style="margin-bottom: 16px; font-size: 1.1rem; color: #888;"></div>
+        <div id="score-display" style="font-size: 1.3rem; font-weight: bold; margin-bottom: 12px; text-align: center;"></div>
         <div id="timer-bar-container"><div id="timer-bar"></div></div>
         <div id="question-box" style="width: 100%; margin-bottom: 24px;">
             <div id="question-text" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 24px;"></div>
@@ -580,6 +591,7 @@
         let currentIndex = 0;
         let score = 0;
         let answered = false;
+        let questionScore = 1000; // New: score for current question
 
         // --- DOM Elements ---
         const categoryTitle = document.getElementById('category-title');
@@ -602,10 +614,13 @@
             clearTimer();
             timeLeft = 10;
             timerStart = Date.now();
+            questionScore = 1000; // Reset question score at start
             updateTimerBar();
             timer = setInterval(() => {
                 const elapsed = Date.now() - timerStart;
                 timeLeft = Math.max(0, 10 - elapsed / 1000);
+                // Decrease score linearly with time
+                questionScore = Math.max(0, Math.round(1000 * (timeLeft / 10)));
                 updateTimerBar();
                 if (elapsed >= timerDuration) {
                     clearTimer();
@@ -636,12 +651,29 @@
             return array;
         }
 
+        function prepareQuestions(questions) {
+            // For each question, shuffle options and store the shuffled array and correct index
+            return questions.map(q => {
+                const optionObjs = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.answer }));
+                const shuffled = shuffle(optionObjs);
+                const correctIdx = shuffled.findIndex(opt => opt.isCorrect);
+                return {
+                    ...q,
+                    _shuffledOptions: shuffled,
+                    _correctIndex: correctIdx
+                };
+            });
+        }
+
         // --- Render Functions ---
         function renderQuestion() {
             answered = false;
             resultBox.style.display = 'none';
             skipBtn.style.display = 'inline-block';
             timerBarContainer.style.display = 'flex';
+            // Show score display
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.style.display = '';
             // Animate trivia container for every question
             const triviaContainer = document.getElementById('trivia-container');
             triviaContainer.classList.remove('fade-in-result');
@@ -650,6 +682,7 @@
             triviaContainer.classList.add('fade-in-trivia');
             categoryTitle.style.display = '';
             progress.style.display = '';
+            scoreDisplay.textContent = `Score: ${score}`;
             if (currentIndex >= currentQuestions.length) {
                 showResult();
                 return;
@@ -659,10 +692,11 @@
             progress.textContent = `Question ${currentIndex + 1} of ${currentQuestions.length}`;
             questionText.textContent = qObj.q;
             answersDiv.innerHTML = '';
-            qObj.options.forEach((opt, idx) => {
+            // Use pre-shuffled options
+            qObj._shuffledOptions.forEach((optObj, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'my-animated-button';
-                btn.textContent = opt;
+                btn.textContent = optObj.text;
                 btn.style.opacity = 1;
                 btn.onclick = () => selectAnswer(idx);
                 answersDiv.appendChild(btn);
@@ -676,18 +710,28 @@
             clearTimer();
             const qObj = currentQuestions[currentIndex];
             const allBtns = answersDiv.querySelectorAll('button');
+            const shuffledOptions = qObj._shuffledOptions;
+            // Mark which option was answered for result calculation
+            shuffledOptions[idx].answered = true;
             allBtns.forEach((btn, i) => {
                 btn.disabled = true;
-                if (i === qObj.answer) {
+                if (shuffledOptions[i].isCorrect) {
                     btn.style.background = 'linear-gradient(90deg, #4caf50, #43e97b)';
                     btn.style.color = '#fff';
+                    btn.classList.add('correct-animate');
+                    setTimeout(() => btn.classList.remove('correct-animate'), 350);
                 }
-                if (i === idx && idx !== qObj.answer) {
+                if (i === idx && !shuffledOptions[i].isCorrect) {
                     btn.style.background = 'linear-gradient(90deg, #e45467, #d32d2d)';
                     btn.style.color = '#fff';
                 }
             });
-            if (idx === qObj.answer) score++;
+            if (shuffledOptions[idx].isCorrect) {
+                score += questionScore; // Add time-based score
+                // Update score display immediately
+                const scoreDisplay = document.getElementById('score-display');
+                scoreDisplay.textContent = `Score: ${score}`;
+            }
             setTimeout(() => {
                 currentIndex++;
                 renderQuestion();
@@ -709,19 +753,35 @@
             answersDiv.innerHTML = '';
             skipBtn.style.display = 'none';
             resultBox.style.display = 'flex';
+            // Hide score display on results
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.style.display = 'none';
             resultBox.classList.remove('fade-in-result');
             void resultBox.offsetWidth; // force reflow
             resultBox.classList.add('fade-in-result');
-            scoreText.textContent = `You scored ${score} out of ${currentQuestions.length}!`;
+            // Calculate number correct
+            let numCorrect = 0;
+            for (let i = 0; i < currentIndex; i++) {
+                const q = currentQuestions[i];
+                if (q._shuffledOptions && q._shuffledOptions.some(opt => opt.isCorrect && opt.answered)) {
+                    numCorrect++;
+                }
+            }
+            // Display number correct at top, score below
+            scoreText.innerHTML = `<span style='font-size:2em; display:block; margin-bottom: 18px;'>You got ${numCorrect} out of ${currentQuestions.length} correct!</span><span style='font-size:1.3em; display:block; margin-bottom: 8px;'>Total Score: ${score} points</span>`;
             timerBar.style.width = '0%';
             timerBarContainer.style.display = 'none';
             clearTimer();
         }
 
         function playAgain() {
-            currentQuestions = shuffle([...questionPool[selectedCategory]]).slice(0, 5);
+            // Prepare questions with shuffled options for this round
+            currentQuestions = prepareQuestions(shuffle([...questionPool[selectedCategory]]).slice(0, 5));
             currentIndex = 0;
             score = 0;
+            // Update score display on restart
+            const scoreDisplay = document.getElementById('score-display');
+            if (scoreDisplay) scoreDisplay.textContent = `Score: 0`;
             renderQuestion();
         }
 
@@ -778,8 +838,8 @@
                 document.body.classList.remove('dark-mode');
                 themeToggle.classList.remove('dark-mode');
             }
-            // Select 5 random questions from the pool
-            currentQuestions = shuffle([...questionPool[selectedCategory]]).slice(0, 5);
+            // Prepare questions with shuffled options for this round
+            currentQuestions = prepareQuestions(shuffle([...questionPool[selectedCategory]]).slice(0, 5));
             currentIndex = 0;
             score = 0;
             renderQuestion();
