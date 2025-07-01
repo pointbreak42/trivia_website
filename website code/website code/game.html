@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Blast!</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fff6e0, #e0e7ff, #ffe0f7, #e0fff6);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            /* fallback for browsers that don't support gradients */
+            background-color: #fff6e0;
+            transition: background 3.2s cubic-bezier(.4,0,.2,1), background-color 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #232222, #3a3a4a, #2d2d3a, #3a2d2d);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #232222;
+        }
+        .dark-mode body {
+            background: linear-gradient(135deg, #232222, #3a3a4a, #2d2d3a, #3a2d2d);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #232222;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .my-button {
+            background: linear-gradient(90deg, #ffb86c, #ff6e7f, #ffb6e6, #ffb86c);
+            background-size: 300% 300%;
+            color: white;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+        @keyframes buttonGradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body.dark-mode .my-button {
+            background: linear-gradient(90deg, #3a3a4a, #2d2d3a, #3a2d2d, #3a3a4a);
+            background-size: 300% 300%;
+            animation: buttonGradientMove 6s ease-in-out infinite, fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
+            color: #fff;
+        }
+        .dark-mode body .my-button {
+            background: linear-gradient(90deg, #3a3a4a, #2d2d3a, #3a2d2d, #3a3a4a);
+            background-size: 300% 300%;
+            animation: buttonGradientMove 6s ease-in-out infinite, fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
+            color: #fff;
+        }
+        .my-button:hover {
+            background: linear-gradient(90deg, #ff6e7f, #ffb86c, #ffb6e6, #ff6e7f);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
+        }
+        body.dark-mode .my-button:hover {
+            background: linear-gradient(90deg, #2d2d3a, #3a2d2d, #3a3a4a, #2d2d3a);
+            background-size: 300% 300%;
+        }
+        .dark-mode body .my-button:hover {
+            background: linear-gradient(90deg, #2d2d3a, #3a2d2d, #3a3a4a, #2d2d3a);
+            background-size: 300% 300%;
+        }
+
+        .logo {
+            width: 200px; /* Adjust size as needed */
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInLogo 1.2s cubic-bezier(.23,1.01,.32,1) 0.4s forwards;
+        }
+        @keyframes fadeInLogo {
+            from { opacity: 0; transform: scale(0.85); }
+            60% { opacity: 1; transform: scale(1.05); }
+            80% { transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Hamburger Menu Styles */
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 999;
+            transition: top 0.5s;
+        }
+
+        .sidebar.open + .menu-icon {
+            top: 300px;
+        }
+
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+
+        .sidebar a, .sidebar .closebtn {
+            font-family: 'Gavoline', sans-serif !important;
+            font-weight: bold !important;
+        }
+
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+
+        /* Animation for hamburger to X */
+        .change div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+
+        .change div:nth-child(2) {
+            opacity: 0;
+        }
+
+        .change div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        .dark-mode .theme-toggle {
+            background-color: #464545;
+            color: white;
+        }
+        .theme-toggle.dark-mode {
+            background-color: #666666; /* Dark background for dark mode */
+            border-radius: 50%; /* Optional: make it circular */
+        }
+
+        .theme-toggle img {
+            filter: none !important;
+            background: none !important;
+        }
+
+        body.dark-mode .theme-toggle img {
+            filter: invert(1);
+        }
+
+        @font-face {
+            font-family: 'Gavoline';
+            src: url('fonts/GavolineDemo.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @keyframes fadeInBox {
+            from { opacity: 0; transform: translate(-50%, calc(-50% + 40px)) scale(0.98); }
+            to { opacity: 1; transform: translate(0, 0) scale(1); }
+        }
+
+        /* Add styles for the new animated buttons */
+        .my-animated-button {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            color: white;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+        @keyframes fadeInButton {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes buttonGradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body.dark-mode .my-animated-button {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+            background-size: 300% 300%;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            color: #fff;
+        }
+        body.dark-mode .my-animated-button:hover {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+            background-size: 300% 300%;
+        }
+        .my-animated-button:hover {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
+        }
+
+        /* Category Button Styles */
+        .categories-container {
+            position: relative; /* Essential for dropdown positioning */
+            display: inline-block; /* Allows it to sit next to other inline-block elements */
+            margin-top: 0px; /* Adjusted spacing to move it closer to the play button */
+        }
+
+        .category-button {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            color: white;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0; /* Initial opacity for fade-in animation */
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite; /* Same animation as play button */
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+
+        .category-button:hover {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
+        }
+
+        .category-options {
+            display: none; /* Hidden by default */
+            position: absolute;
+            background-color: #f9f9f9; /* Dropdown background */
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden; /* Ensures rounded corners are applied */
+            left: 50%; /* Center the dropdown below the button */
+            transform: translateX(-50%); /* Adjust for centering */
+            top: calc(100% + 10px); /* Position below the button with some spacing */
+        }
+
+        .category-options.active {
+            display: block; /* Show when active */
+            animation: fadein 0.3s ease-out forwards; /* Added fade-in animation */
+        }
+
+        .category-option {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: none; /* Remove gradient for individual options */
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .category-option:hover {
+            background-color: #ddd; /* Hover effect for dropdown items */
+            transform: none; /* Remove previous scale effect */
+            box-shadow: none; /* Remove previous box shadow */
+        }
+
+        /* Dark Mode for Category Buttons */
+        body.dark-mode .category-button {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429); /* Adjusted dark mode gradient */
+            background-size: 300% 300%;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite; /* Added fadeInButton back */
+            color: #fff;
+        }
+        body.dark-mode .category-button:hover {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+            background-size: 300% 300%;
+        }
+        body.dark-mode .category-options {
+            background-color: #333;
+        }
+        body.dark-mode .category-option {
+            color: white;
+        }
+        body.dark-mode .category-option:hover {
+            background-color: #555;
+        }
+
+        @keyframes fadein {
+            from { opacity: 0; transform: translateX(-50%); }
+            to { opacity: 1; transform: translateX(-50%); }
+        }
+
+        /* Curtain Animation Styles */
+        .curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .curtain.active {
+            transform: translateY(0);
+        }
+
+        /* Trivia Game Container Styles */
+        #trivia-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 60px auto 0 auto;
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.10);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Gavoline', sans-serif;
+            color: #232222;
+        }
+        #trivia-container h2,
+        #trivia-container #progress,
+        #trivia-container #question-text,
+        #trivia-container #score-text {
+            text-align: center;
+            width: 100%;
+        }
+        #question-text {
+            text-align: center;
+        }
+        #answers {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            width: 100%;
+        }
+        .my-animated-button {
+            text-align: center;
+        }
+        body.dark-mode #trivia-container {
+            background: rgba(34, 34, 34, 0.92);
+            color: #fff;
+        }
+        body.dark-mode #trivia-container #progress {
+            color: #bbb;
+        }
+        #answers .my-animated-button {
+            width: 80%;
+            max-width: 350px;
+            min-width: 200px;
+        }
+        #skip-btn.my-animated-button {
+            width: auto;
+            max-width: none;
+            min-width: 0;
+            animation: none !important;
+            opacity: 1 !important;
+        }
+        /* Remove transitions/animations from question box and its children except skip button */
+        #question-box, #question-box *:not(#skip-btn) {
+            transition: none !important;
+            animation: none !important;
+        }
+        /* Timer Bar Styles */
+        #timer-bar-container {
+            width: 100%;
+            max-width: 350px;
+            height: 18px;
+            background: #f3e0e0;
+            border-radius: 12px;
+            margin: 12px 0 18px 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        body.dark-mode #timer-bar-container {
+            background: #23243a;
+        }
+        #timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #e45467, #f1c241);
+            border-radius: 12px 0 0 12px;
+            transition: width 0.5s linear;
+        }
+        body.dark-mode #timer-bar {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+        }
+        /* Remove animation from Play Again and Back to Home buttons on results screen */
+        #result-box .my-animated-button {
+            animation: none !important;
+            opacity: 1 !important;
+        }
+        /* Fade-in animation for trivia start and results */
+        @keyframes fadeInTrivia {
+            from { opacity: 0; transform: translateY(32px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .fade-in-trivia {
+            animation: fadeInTrivia 0.7s cubic-bezier(.23,1.01,.32,1);
+        }
+        @keyframes fadeInResult {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .fade-in-result {
+            animation: fadeInResult 0.7s cubic-bezier(.23,1.01,.32,1);
+        }
+        body.fade-in {
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(.4,0,.2,1);
+        }
+        #main-content {
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(.4,0,.2,1);
+        }
+        body.faded-in #main-content {
+            opacity: 1;
+        }
+    </style>
+    <script>
+      (function() {
+        try {
+          if (localStorage.getItem('darkMode') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch(e){}
+      })();
+    </script>
+</head>
+<body class="fade-in">
+    <div id="main-content">
+    <!-- Add curtain element -->
+    <div class="curtain" id="curtain"></div>
+    
+    <!-- Dark Mode Toggle and Icon -->
+    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
+        <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
+    </button>
+    <!-- Hamburger Menu Icon -->
+    <div class="menu-icon" onclick="toggleMenu(this)">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="home_page.html">Home</a>
+        <a href="#">Profile</a>
+        <a href="#">Leaderboard</a>
+        <a href="#">Settings</a>
+        <a href="about.html">About</a>
+        <a href="#">Help</a>
+    </div>
+
+    <!-- Trivia Game Container -->
+    <div id="trivia-container">
+        <h2 id="category-title" style="margin-bottom: 8px; font-size: 2.2rem; letter-spacing: 1px;"></h2>
+        <div id="progress" style="margin-bottom: 16px; font-size: 1.1rem; color: #888;"></div>
+        <div id="timer-bar-container"><div id="timer-bar"></div></div>
+        <div id="question-box" style="width: 100%; margin-bottom: 24px;">
+            <div id="question-text" style="font-size: 1.4rem; font-weight: bold; margin-bottom: 24px;"></div>
+            <div id="answers" style="display: flex; flex-direction: column; gap: 16px;"></div>
+        </div>
+        <button class="my-animated-button" id="skip-btn" style="margin-top: 8px;" onclick="skipQuestion()">Skip</button>
+        <div id="result-box" style="display: none; flex-direction: column; align-items: center;">
+            <div id="score-text" style="font-size: 1.5rem; font-weight: bold; margin-top: 0px; margin-bottom: 16px;"></div>
+            <button class="my-animated-button" onclick="playAgain()">Play Again</button>
+            <button class="my-animated-button" onclick="goHome()">Home</button>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // --- Question Pool (embedded) ---
+        const questionPool = {
+            'pop-culture': [
+                {"q": "Which singer famously wore a meat dress to the 2010 MTV Video Music Awards?", "hint": "She's known for her 'Poker Face' and calls her fans 'Little Monsters.'", "options": ["Katy Perry", "Nicki Minaj", "Rihanna", "Lady Gaga"], "answer": 3},
+                {"q": "What is the name of the coffee shop where the characters of Friends frequently hang out?", "hint": "It's not Starbucks, but it's central to the group's social life.", "options": ["Java Joe's", "Brew Crew", "Bean Town", "Central Perk"], "answer": 3},
+                {"q": "Which Marvel superhero is known for wielding a hammer called Mjölnir?", "hint": "He's the Norse God of Thunder and has flowing blonde hair (at least early on).", "options": ["Iron Man", "Captain America", "Hulk", "Thor"], "answer": 3},
+                {"q": "What Netflix series features a group of kids fighting supernatural forces in the town of Hawkins, Indiana?", "hint": "Think 1980s nostalgia, Demogorgons, and Eleven.", "options": ["Dark", "The Umbrella Academy", "Riverdale", "Stranger Things"], "answer": 3},
+                {"q": "Who interrupted Taylor Swift's acceptance speech at the 2009 MTV VMAs, saying 'I'mma let you finish...'?", "hint": "He's a controversial rapper known for his outspoken nature and Yeezy fashion brand.", "options": ["Drake", "Lil Wayne", "Travis Scott", "Kanye West"], "answer": 3},
+                {"q": "In Breaking Bad, what is Walter White's street name?", "hint": "It's also a famous German surname and a brand of meth in the show.", "options": ["Eisenberg", "Goldberg", "Steinberg", "Heisenberg"], "answer": 3},
+                {"q": "Which 2023 movie starring Margot Robbie and Ryan Gosling is based on a famous doll?", "hint": "Come on Barbie, let's go party.", "options": ["Toy Story 5", "Dollhouse", "Dream Life", "Barbie"], "answer": 3},
+                {"q": "Which animated TV show features a talking baby with a British accent and a sarcastic dog?", "hint": "It's centered around the Griffin family.", "options": ["The Simpsons", "American Dad", "South Park", "Family Guy"], "answer": 3},
+                {"q": "What South Korean survival drama became a massive hit on Netflix in 2021?", "hint": "Contestants compete in deadly versions of children's games for a cash prize.", "options": ["All of Us Are Dead", "Sweet Home", "Alice in Borderland", "Squid Game"], "answer": 3},
+                {"q": "What singer holds the record for the most Grammy wins of all time as of 2023?", "hint": "She released albums like Lemonade and Renaissance.", "options": ["Adele", "Taylor Swift", "Whitney Houston", "Beyoncé"], "answer": 3}
+            ],
+            'movies': [
+                {"q": "Which movie features the line, 'I'll be back'?", "hint": "It stars a bodybuilder-turned-governor and involves time-traveling cyborgs.", "options": ["RoboCop", "Predator", "Total Recall", "The Terminator"], "answer": 3},
+                {"q": "What movie won the first Academy Award for Best Picture?", "hint": "It's a silent film with a name that sounds like something you'd take on vacation.", "options": ["Metropolis", "Casablanca", "Sunrise", "Wings"], "answer": 3},
+                {"q": "Which film features a young lion prince named Simba?", "hint": "It's animated, has talking animals, and includes the song 'Circle of Life.'", "options": ["Madagascar", "Jungle Book", "Bambi", "The Lion King"], "answer": 3},
+                {"q": "In which movie does Tom Hanks say, 'Life is like a box of chocolates'?", "hint": "The main character runs a lot and meets several U.S. presidents.", "options": ["Cast Away", "Saving Private Ryan", "The Green Mile", "Forrest Gump"], "answer": 3},
+                {"q": "Which 1997 movie is about a ship that sinks after hitting an iceberg?", "hint": "'I'm the king of the world!' is a famous line from this film.", "options": ["Master and Commander", "The Perfect Storm", "Poseidon", "Titanic"], "answer": 3},
+                {"q": "Who played Jack Sparrow in the Pirates of the Caribbean series?", "hint": "He's also known for playing Edward Scissorhands and Willy Wonka.", "options": ["Orlando Bloom", "Brad Pitt", "Robert Downey Jr.", "Johnny Depp"], "answer": 3},
+                {"q": "Which horror movie features a killer named Michael Myers?", "hint": "It's named after a holiday and directed by John Carpenter.", "options": ["Friday the 13th", "Scream", "The Texas Chain Saw Massacre", "Halloween"], "answer": 3},
+                {"q": "What film is set in a dream within a dream within a dream?", "hint": "Directed by Christopher Nolan, this movie messes with time and gravity.", "options": ["Memento", "Interstellar", "The Matrix", "Inception"], "answer": 3},
+                {"q": "Which movie features a DeLorean time machine?", "hint": "Great Scott! It's the ultimate '80s time-travel film.", "options": ["Timecop", "Bill & Ted's Excellent Adventure", "The Time Traveler's Wife", "Back to the Future"], "answer": 3},
+                {"q": "Which Marvel movie first brought together Iron Man, Captain America, Thor, and the Hulk?", "hint": "It's about assembling a superhero team to stop Loki.", "options": ["Iron Man 2", "Captain America: Civil War", "Thor: The Dark World", "The Avengers"], "answer": 3}
+            ]
+        };
+
+        let selectedCategory = localStorage.getItem('selectedCategory') || 'movies';
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // --- DOM Elements ---
+        const categoryTitle = document.getElementById('category-title');
+        const progress = document.getElementById('progress');
+        const questionText = document.getElementById('question-text');
+        const answersDiv = document.getElementById('answers');
+        const resultBox = document.getElementById('result-box');
+        const scoreText = document.getElementById('score-text');
+        const skipBtn = document.getElementById('skip-btn');
+
+        // --- Timer State ---
+        let timer = null;
+        let timeLeft = 10;
+        let timerStart = null;
+        let timerDuration = 10 * 1000; // 10 seconds in ms
+        const timerBar = document.getElementById('timer-bar');
+        const timerBarContainer = document.getElementById('timer-bar-container');
+
+        function startTimer() {
+            clearTimer();
+            timeLeft = 10;
+            timerStart = Date.now();
+            updateTimerBar();
+            timer = setInterval(() => {
+                const elapsed = Date.now() - timerStart;
+                timeLeft = Math.max(0, 10 - elapsed / 1000);
+                updateTimerBar();
+                if (elapsed >= timerDuration) {
+                    clearTimer();
+                    skipQuestion(true); // true = auto-skip
+                }
+            }, 10);
+        }
+        function clearTimer() {
+            if (timer) clearInterval(timer);
+            timer = null;
+        }
+        function updateTimerBar() {
+            // 10 seconds = 100%, 0 seconds = 0%
+            const percent = Math.max(0, (timeLeft / 10) * 100);
+            timerBar.style.width = percent + '%';
+        }
+
+        // --- Utility ---
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1).replace('-', ' ');
+        }
+        // Fisher-Yates shuffle
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- Render Functions ---
+        function renderQuestion() {
+            answered = false;
+            resultBox.style.display = 'none';
+            skipBtn.style.display = 'inline-block';
+            timerBarContainer.style.display = 'flex';
+            // Animate trivia container for every question
+            const triviaContainer = document.getElementById('trivia-container');
+            triviaContainer.classList.remove('fade-in-result');
+            triviaContainer.classList.remove('fade-in-trivia');
+            void triviaContainer.offsetWidth; // force reflow
+            triviaContainer.classList.add('fade-in-trivia');
+            categoryTitle.style.display = '';
+            progress.style.display = '';
+            if (currentIndex >= currentQuestions.length) {
+                showResult();
+                return;
+            }
+            const qObj = currentQuestions[currentIndex];
+            categoryTitle.textContent = selectedCategory === 'pop-culture' ? 'Pop-Culture' : 'Movies';
+            progress.textContent = `Question ${currentIndex + 1} of ${currentQuestions.length}`;
+            questionText.textContent = qObj.q;
+            answersDiv.innerHTML = '';
+            qObj.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'my-animated-button';
+                btn.textContent = opt;
+                btn.style.opacity = 1;
+                btn.onclick = () => selectAnswer(idx);
+                answersDiv.appendChild(btn);
+            });
+            startTimer();
+        }
+
+        function selectAnswer(idx) {
+            if (answered) return;
+            answered = true;
+            clearTimer();
+            const qObj = currentQuestions[currentIndex];
+            const allBtns = answersDiv.querySelectorAll('button');
+            allBtns.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === qObj.answer) {
+                    btn.style.background = 'linear-gradient(90deg, #4caf50, #43e97b)';
+                    btn.style.color = '#fff';
+                }
+                if (i === idx && idx !== qObj.answer) {
+                    btn.style.background = 'linear-gradient(90deg, #e45467, #d32d2d)';
+                    btn.style.color = '#fff';
+                }
+            });
+            if (idx === qObj.answer) score++;
+            setTimeout(() => {
+                currentIndex++;
+                renderQuestion();
+            }, 900);
+        }
+
+        function skipQuestion(auto = false) {
+            if (answered) return;
+            answered = true;
+            clearTimer();
+            currentIndex++;
+            renderQuestion();
+        }
+
+        function showResult() {
+            categoryTitle.style.display = 'none';
+            progress.style.display = 'none';
+            questionText.textContent = '';
+            answersDiv.innerHTML = '';
+            skipBtn.style.display = 'none';
+            resultBox.style.display = 'flex';
+            resultBox.classList.remove('fade-in-result');
+            void resultBox.offsetWidth; // force reflow
+            resultBox.classList.add('fade-in-result');
+            scoreText.textContent = `You scored ${score} out of ${currentQuestions.length}!`;
+            timerBar.style.width = '0%';
+            timerBarContainer.style.display = 'none';
+            clearTimer();
+        }
+
+        function playAgain() {
+            currentQuestions = shuffle([...questionPool[selectedCategory]]).slice(0, 5);
+            currentIndex = 0;
+            score = 0;
+            renderQuestion();
+        }
+
+        function goHome() {
+            window.location.href = 'home_page.html';
+        }
+
+        // --- Dark Mode Toggle (copied from home_page.html, with persistence) ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'dark');
+            } else {
+                themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'light');
+            }
+        }
+
+        // --- Sidebar & Hamburger Menu Logic (copied from home_page.html) ---
+        function toggleMenu(element) {
+            element.classList.toggle("change");
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.classList.toggle("open");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.querySelector('.menu-icon').classList.remove("change");
+        }
+
+        // Close sidebar when clicking outside
+        window.onclick = function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const menuIcon = document.querySelector('.menu-icon');
+            // No categoriesContainer on game.html, so skip that part
+            if (event.target !== sidebar && event.target !== menuIcon && !menuIcon.contains(event.target)) {
+                sidebar.style.width = "0";
+                menuIcon.classList.remove("change");
+            }
+        }
+
+        // --- On Load ---
+        window.onload = function() {
+            // Dark mode persistence
+            const darkMode = localStorage.getItem('darkMode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.classList.remove('dark-mode');
+            }
+            // Select 5 random questions from the pool
+            currentQuestions = shuffle([...questionPool[selectedCategory]]).slice(0, 5);
+            currentIndex = 0;
+            score = 0;
+            renderQuestion();
+        };
+
+        // Fade-in effect for body on load
+        window.addEventListener('DOMContentLoaded', function() {
+            if (document.activeElement) document.activeElement.blur();
+            document.body.classList.remove('fade-in');
+            document.body.classList.add('faded-in');
+            var mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1)';
+                mainContent.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>
