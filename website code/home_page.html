@@ -75,11 +75,20 @@
             opacity: 0;
             animation: fadeInLogo 1.2s cubic-bezier(.23,1.01,.32,1) 0.4s forwards;
         }
+        .logo.pulse {
+            animation: fadeInLogo 1.2s cubic-bezier(.23,1.01,.32,1) 0.4s forwards, logoPulse 0.7s cubic-bezier(.4,0,.2,1) 0s 1;
+        }
         @keyframes fadeInLogo {
             from { opacity: 0; transform: scale(0.85); }
             60% { opacity: 1; transform: scale(1.05); }
             80% { transform: scale(0.98); }
             to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes logoPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            40% { transform: scale(1.13); filter: brightness(1.18); }
+            60% { transform: scale(0.97); filter: brightness(0.92); }
+            100% { transform: scale(1); filter: brightness(1); }
         }
 
         .title {
@@ -338,28 +347,32 @@
             to { opacity: 1; transform: translateX(-50%); }
         }
 
-        /* Curtain Animation Styles */
-        .curtain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 9999;
-            transform: translateY(-100%);
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        body.fade-out {
+            opacity: 0;
+            transition: opacity 0.5s cubic-bezier(.4,0,.2,1);
         }
 
-        .curtain.active {
-            transform: translateY(0);
+        .sidebar, .sidebar a, .sidebar .closebtn {
+            font-family: 'Gavoline', sans-serif !important;
+            font-weight: bold !important;
         }
+
+        #main-content { opacity: 0; }
+
+        body > * { display: none !important; }
+        body.page-ready > * { display: revert !important; }
     </style>
+    <script>
+      (function() {
+        try {
+          if (localStorage.getItem('darkMode') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch(e){}
+      })();
+    </script>
 </head>
 <body>
-    <!-- Add curtain element -->
-    <div class="curtain" id="curtain"></div>
-    
     <!-- Dark Mode Toggle and Icon -->
     <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
         <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
@@ -374,7 +387,6 @@
 <!-- Title and Logo-->
     <img src="logolm.png" class="logo" style="width: 450px; margin-top: -100px;" id="logo">
     
-
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
@@ -390,7 +402,7 @@
         <button class="category-button" id="categoriesButton" onclick="toggleCategories()">categories</button>
         <div class="category-options" id="categoryOptions">
             <button class="category-option" onclick="selectCategory('movies')">movies</button>
-            <button class="category-option" onclick="selectCategory('pop-culture')">pop culture</button>
+            <button class="category-option" onclick="selectCategory('pop-culture')">pop-culture</button>
         </div>
     </div>
 
@@ -431,9 +443,11 @@
             if (document.body.classList.contains('dark-mode')) {
                 if (logo) logo.src = "logodm.png";
                 themeToggle.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'dark');
             } else {
                 if (logo) logo.src = "logolm.png";
                 themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'light');
             }
         }
 
@@ -445,31 +459,66 @@
         function selectCategory(category) {
             // Store the selected category (optional, if you need it elsewhere)
             localStorage.setItem('selectedCategory', category);
-            
             const button = document.getElementById('categoriesButton');
-            button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-            
+            button.textContent = category;
             // Hide the dropdown after selection
             document.getElementById('categoryOptions').classList.remove('active');
         }
 
         // On page load, ensure button says 'categories'
         window.onload = function() {
+            // Dark mode persistence
+            const darkMode = localStorage.getItem('darkMode');
+            const logo = document.getElementById('logo');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'dark') {
+                document.body.classList.add('dark-mode');
+                if (logo) logo.src = "logodm.png";
+                themeToggle.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (logo) logo.src = "logolm.png";
+                themeToggle.classList.remove('dark-mode');
+            }
             const button = document.getElementById('categoriesButton');
-            button.textContent = 'categories';
-            // Clear any previously saved category to ensure it always starts with 'categories'
-            localStorage.removeItem('selectedCategory');
+            button.textContent = 'movies';
+            localStorage.setItem('selectedCategory', 'movies');
+            var mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                mainContent.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1)';
+                mainContent.style.opacity = '1';
+            }
+            document.body.classList.add('page-ready');
         }
 
         function startGame() {
-            const curtain = document.getElementById('curtain');
-            curtain.classList.add('active');
-            
-            // Wait for animation to complete before redirecting
-            setTimeout(() => {
-                // Add your game page URL here
+            const logo = document.getElementById('logo');
+            const body = document.body;
+            const mainContent = document.getElementById('main-content');
+            if (document.activeElement) document.activeElement.blur();
+            if (logo) {
+                logo.classList.add('pulse');
+                setTimeout(() => {
+                    body.classList.add('fading');
+                    body.classList.add('fade-out');
+                    if (mainContent) {
+                        mainContent.style.opacity = '0';
+                        mainContent.addEventListener('transitionend', function handler(e) {
+                            if (e.propertyName === 'opacity') {
+                                mainContent.removeEventListener('transitionend', handler);
+                                mainContent.style.display = 'none'; // Hard hide before navigation
+                                // Select 5 random questions from the pool
+                                currentQuestions = shuffle([...questionPool[selectedCategory]]).slice(0, 5);
+                                window.location.href = 'game.html';
+                            }
+                        });
+                    } else {
+                        setTimeout(() => { window.location.href = 'game.html'; }, 500);
+                    }
+                }, 500);
+            } else {
                 window.location.href = 'game.html';
-            }, 800); // Match this with the transition duration
+            }
         }
     </script>
 </body>
