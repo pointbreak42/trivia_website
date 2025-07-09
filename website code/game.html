@@ -20,13 +20,13 @@
             transition: background 3.2s cubic-bezier(.4,0,.2,1), background-color 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1);
         }
         body.dark-mode {
-            background: linear-gradient(135deg, #232222, #3a3a4a, #2d2d3a, #3a2d2d);
+            background: linear-gradient(135deg, #232222, #23243a 30%, #3a2d2d 60%, #23243a 100%);
             background-size: 400% 400%;
             animation: gradientMove 16s ease-in-out infinite;
             background-color: #232222;
         }
         .dark-mode body {
-            background: linear-gradient(135deg, #232222, #3a3a4a, #2d2d3a, #3a2d2d);
+            background: linear-gradient(135deg, #232222, #23243a 30%, #3a2d2d 60%, #23243a 100%);
             background-size: 400% 400%;
             animation: gradientMove 16s ease-in-out infinite;
             background-color: #232222;
@@ -381,6 +381,8 @@
         #trivia-container {
             width: 100%;
             max-width: 600px;
+            min-width: 600px;
+            min-height: 520px;
             margin: 60px auto 0 auto;
             background: rgba(255,255,255,0.85);
             border-radius: 16px;
@@ -500,6 +502,12 @@
             50% { transform: scale(1.18); }
             100% { transform: scale(1); }
         }
+        #result-box {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 72px;
+        }
     </style>
     <script>
       (function() {
@@ -528,10 +536,18 @@
         <source src="sounds/incorrect.ogg" type="audio/ogg">
     </audio>
     
-    <!-- Dark Mode Toggle and Icon -->
-    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
-        <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
-    </button>
+    <!-- Dark Mode Toggle and Volume Button -->
+    <div id="top-right-controls"
+      style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 9999; align-items: center;">
+        <!-- Dark Mode Button -->
+        <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" type="button">
+            <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
+        </button>
+        <!-- Volume Mute Button -->
+        <button class="theme-toggle" id="volumeMuteBtn" type="button">
+            <img src="volumeicon.png" alt="Volume" style="width: 24px; height: 24px;">
+        </button>
+    </div>
     <!-- Hamburger Menu Icon -->
     <div class="menu-icon" onclick="toggleMenu(this)">
         <div></div>
@@ -543,8 +559,8 @@
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <a href="home_page.html">Home</a>
-        <a href="#">Profile</a>
-        <a href="#">Leaderboard</a>
+        <a href="profile.html">Profile</a>
+        <a href="leaderboard.html">Leaderboard</a>
         <a href="#">Settings</a>
         <a href="about.html">About</a>
         <a href="#">Help</a>
@@ -575,16 +591,28 @@
         // --- Question Pool (embedded) ---
         const questionPool = {
             'pop-culture': [
+                // Previous questions
                 {"q": "Which singer famously wore a meat dress to the 2010 MTV Video Music Awards?", "hint": "She's known for her 'Poker Face' and calls her fans 'Little Monsters.'", "options": ["Katy Perry", "Nicki Minaj", "Rihanna", "Lady Gaga"], "answer": 3},
                 {"q": "What is the name of the coffee shop where the characters of Friends frequently hang out?", "hint": "It's not Starbucks, but it's central to the group's social life.", "options": ["Java Joe's", "Brew Crew", "Bean Town", "Central Perk"], "answer": 3},
                 {"q": "Which Marvel superhero is known for wielding a hammer called Mjölnir?", "hint": "He's the Norse God of Thunder and has flowing blonde hair (at least early on).", "options": ["Iron Man", "Captain America", "Hulk", "Thor"], "answer": 3},
                 {"q": "What Netflix series features a group of kids fighting supernatural forces in the town of Hawkins, Indiana?", "hint": "Think 1980s nostalgia, Demogorgons, and Eleven.", "options": ["Dark", "The Umbrella Academy", "Riverdale", "Stranger Things"], "answer": 3},
-                {"q": "Who interrupted Taylor Swift's acceptance speech at the 2009 MTV VMAs, saying 'I'mma let you finish...'?", "hint": "He's a controversial rapper known for his outspoken nature and Yeezy fashion brand.", "options": ["Drake", "Lil Wayne", "Travis Scott", "Kanye West"], "answer": 3},
+                {"q": "Who interrupted Taylor Swift's acceptance speech at the 2009 MTV VMAs, saying 'I'mma let you finish...'", "hint": "He's a controversial rapper known for his outspoken nature and Yeezy fashion brand.", "options": ["Drake", "Lil Wayne", "Travis Scott", "Kanye West"], "answer": 3},
                 {"q": "In Breaking Bad, what is Walter White's street name?", "hint": "It's also a famous German surname and a brand of meth in the show.", "options": ["Eisenberg", "Goldberg", "Steinberg", "Heisenberg"], "answer": 3},
                 {"q": "Which 2023 movie starring Margot Robbie and Ryan Gosling is based on a famous doll?", "hint": "Come on Barbie, let's go party.", "options": ["Toy Story 5", "Dollhouse", "Dream Life", "Barbie"], "answer": 3},
                 {"q": "Which animated TV show features a talking baby with a British accent and a sarcastic dog?", "hint": "It's centered around the Griffin family.", "options": ["The Simpsons", "American Dad", "South Park", "Family Guy"], "answer": 3},
                 {"q": "What South Korean survival drama became a massive hit on Netflix in 2021?", "hint": "Contestants compete in deadly versions of children's games for a cash prize.", "options": ["All of Us Are Dead", "Sweet Home", "Alice in Borderland", "Squid Game"], "answer": 3},
-                {"q": "What singer holds the record for the most Grammy wins of all time as of 2023?", "hint": "She released albums like Lemonade and Renaissance.", "options": ["Adele", "Taylor Swift", "Whitney Houston", "Beyoncé"], "answer": 3}
+                {"q": "What singer holds the record for the most Grammy wins of all time as of 2023?", "hint": "She released albums like Lemonade and Renaissance.", "options": ["Adele", "Taylor Swift", "Whitney Houston", "Beyoncé"], "answer": 3},
+                // Newly added questions
+                {q: "What is the real name of the guitarist known as Slash, famous for his work with Guns N' Roses?", hint: "Famous for his top hat and curly hair.", options: ["Saul Hudson", "Angus Young", "David Howell Evans", "Steve Hackett"], answer: 0},
+                {q: "What is the title of the debut studio album by the American rock band Nirvana, released in 1989?", hint: "It's not Nevermind.", options: ["Bleach", "Nevermind", "In Utero", "Rarities"], answer: 0},
+                {q: "Which plush toy gained fame as an interactive electronic pet that required feeding and care?", hint: "It was a digital egg you had to keep alive.", options: ["Furby", "Tamagotchi", "Cabbage Patch Kids", "Beanie Babies"], answer: 1},
+                {q: "Which company developed and released the classic arcade game 'Space Invaders' in 1978?", hint: "A Japanese company, not Atari.", options: ["Atari", "Namco", "Taito", "Sega"], answer: 2},
+                {q: "In 'Stranger Things,' what is Eleven's real name?", hint: "Her real name is revealed in later seasons.", options: ["Jane Hopper", "Jane Byers", "Jane Wheeler", "Jane Ives"], answer: 3},
+                {q: "What is the name of the character played by Bryan Cranston in 'Malcolm in the Middle'?", hint: "Not Walter White!", options: ["Walter White", "Hal", "Tim", "Dave"], answer: 1},
+                {q: "In the game 'Metal Gear Solid,' what is the real name of the protagonist known as Solid Snake?", hint: "It's a common first name.", options: ["Jack", "David", "Frank", "Roy"], answer: 1},
+                {q: "What British comedian and actor did singer Katy Perry marry in 2010?", hint: "He starred in 'Get Him to the Greek'.", options: ["Sacha Baron Cohen", "Russell Brand", "Ricky Gervais", "Stephen Fry"], answer: 1},
+                {q: "Which Sith Lord was Darth Sidious' master?", hint: "He was killed in his sleep.", options: ["Darth Bane", "Darth Nihilus", "Darth Plagueis", "Darth Revan"], answer: 2},
+                {q: "What is the name of Barbie's youngest sister, who was sold as part of a set with Barbie and Ken from 1998 to 2001?", hint: "Her name starts with a K.", options: ["Kasey", "Kelly", "Stacie", "Krissy"], answer: 3}
             ],
             'movies': [
                 {"q": "Which movie features the line, 'I'll be back'?", "hint": "It stars a bodybuilder-turned-governor and involves time-traveling cyborgs.", "options": ["RoboCop", "Predator", "Total Recall", "The Terminator"], "answer": 3},
@@ -596,7 +624,17 @@
                 {"q": "Which horror movie features a killer named Michael Myers?", "hint": "It's named after a holiday and directed by John Carpenter.", "options": ["Friday the 13th", "Scream", "The Texas Chain Saw Massacre", "Halloween"], "answer": 3},
                 {"q": "What film is set in a dream within a dream within a dream?", "hint": "Directed by Christopher Nolan, this movie messes with time and gravity.", "options": ["Memento", "Interstellar", "The Matrix", "Inception"], "answer": 3},
                 {"q": "Which movie features a DeLorean time machine?", "hint": "Great Scott! It's the ultimate '80s time-travel film.", "options": ["Timecop", "Bill & Ted's Excellent Adventure", "The Time Traveler's Wife", "Back to the Future"], "answer": 3},
-                {"q": "Which Marvel movie first brought together Iron Man, Captain America, Thor, and the Hulk?", "hint": "It's about assembling a superhero team to stop Loki.", "options": ["Iron Man 2", "Captain America: Civil War", "Thor: The Dark World", "The Avengers"], "answer": 3}
+                {"q": "Which Marvel movie first brought together Iron Man, Captain America, Thor, and the Hulk?", "hint": "It's about assembling a superhero team to stop Loki.", "options": ["Iron Man 2", "Captain America: Civil War", "Thor: The Dark World", "The Avengers"], "answer": 3},
+                {q: "In Independence Day, which actor played the computer expert who helped in the fight against the alien invaders?", hint: "He also starred in Jurassic Park.", options: ["Will Smith", "Jeff Goldblum", "Bill Pullman", "Randy Quaid"], answer: 1},
+                {q: "In 'The Great Gatsby,' what is the first name of Daisy Buchanan's husband?", hint: "He is wealthy and unfaithful.", options: ["Fred", "John", "Tom", "George"], answer: 2},
+                {q: "What is the real name of the supervillain known as The Joker, Batman's arch-nemesis?", hint: "Not always consistent in comics, but this is a common movie alias.", options: ["Kirk Langstrom", "Oswald Cobblepot", "Edward Nygma", "Jack White"], answer: 3},
+                {q: "In the movie Die Hard, which building becomes the site of Hans Gruber's hostage situation?", hint: "A fictional skyscraper in Los Angeles.", options: ["Nakamoto Plaza", "Nakatomi Plaza", "Nakamura Tower", "Nakashima Tower"], answer: 1},
+                {q: "What kind of animal is Kuzco transformed into in The Emperor's New Groove?", hint: "It's a South American pack animal.", options: ["Alpaca", "Llama", "Goat", "Horse"], answer: 1},
+                {q: "Which country is the setting for the stories in The Jungle Book?", hint: "Home to tigers and elephants.", options: ["South Africa", "India", "Brazil", "Thailand"], answer: 1},
+                {q: "What is the name of Simba's mother in The Lion King?", hint: "Her name starts with S.", options: ["Nala", "Zira", "Sarabi", "Shenzi"], answer: 2},
+                {q: "Which is not the name of a child selected to tour the Wonka factory in Willy Wonka & the Chocolate Factory?", hint: "This name is not in the original group.", options: ["Billy Warp", "Veruca Salt", "Mike Teavee", "Charlie Bucket"], answer: 0},
+                {q: "Which movie does not feature Emma Stone?", hint: "This is a romantic comedy starring Natalie Portman and Ashton Kutcher.", options: ["Superbad", "Easy A", "The Help", "No Strings Attached"], answer: 3},
+                {q: "Which actor hasn’t played Batman in a movie?", hint: "He starred in 'Heathers' and 'Mr. Robot', but never as Batman.", options: ["Ben Affleck", "Robert Pattinson", "Will Arnett", "Christian Slater"], answer: 3}
             ]
         };
 
@@ -618,23 +656,23 @@
 
         // --- Timer State ---
         let timer = null;
-        let timeLeft = 10;
+        let timeLeft = 15;
         let timerStart = null;
-        let timerDuration = 10 * 1000; // 10 seconds in ms
+        let timerDuration = 15 * 1000; // 15 seconds in ms
         const timerBar = document.getElementById('timer-bar');
         const timerBarContainer = document.getElementById('timer-bar-container');
 
         function startTimer() {
             clearTimer();
-            timeLeft = 10;
+            timeLeft = 15;
             timerStart = Date.now();
             questionScore = 1000; // Reset question score at start
             updateTimerBar();
             timer = setInterval(() => {
                 const elapsed = Date.now() - timerStart;
-                timeLeft = Math.max(0, 10 - elapsed / 1000);
+                timeLeft = Math.max(0, 15 - elapsed / 1000);
                 // Decrease score linearly with time
-                questionScore = Math.max(0, Math.round(1000 * (timeLeft / 10)));
+                questionScore = Math.max(0, Math.round(1000 * (timeLeft / 15)));
                 updateTimerBar();
                 if (elapsed >= timerDuration) {
                     clearTimer();
@@ -647,8 +685,8 @@
             timer = null;
         }
         function updateTimerBar() {
-            // 10 seconds = 100%, 0 seconds = 0%
-            const percent = Math.max(0, (timeLeft / 10) * 100);
+            // 15 seconds = 100%, 0 seconds = 0%
+            const percent = Math.max(0, (timeLeft / 15) * 100);
             timerBar.style.width = percent + '%';
         }
 
@@ -715,6 +753,8 @@
                 btn.onclick = () => selectAnswer(idx);
                 answersDiv.appendChild(btn);
             });
+            // Refill timer bar to full at the start of each question
+            timerBar.style.width = '100%';
             startTimer();
         }
 
@@ -732,6 +772,7 @@
              const correctSound = document.getElementById('correctSound');
              const incorrectSound = document.getElementById('incorrectSound');
              
+             const isDark = document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
              allBtns.forEach((btn, i) => {
                  btn.disabled = true;
                  if (shuffledOptions[i].isCorrect) {
@@ -741,8 +782,13 @@
                      setTimeout(() => btn.classList.remove('correct-animate'), 350);
                  }
                  if (i === idx && !shuffledOptions[i].isCorrect) {
-                     btn.style.background = 'linear-gradient(90deg, #e45467, #d32d2d)';
-                     btn.style.color = '#fff';
+                     if (isDark) {
+                         btn.style.background = 'linear-gradient(90deg, #a83232, #6b1b1b)';
+                         btn.style.color = '#fff';
+                     } else {
+                         btn.style.background = 'linear-gradient(90deg, #ff4d4d, #ff0000)';
+                         btn.style.color = '#fff';
+                     }
                  }
              });
              
@@ -800,6 +846,21 @@
             timerBar.style.width = '0%';
             timerBarContainer.style.display = 'none';
             clearTimer();
+            // Update top score in localStorage if this score is higher
+            const topScore = parseInt(localStorage.getItem('topScore') || '0', 10);
+            if (score > topScore) {
+                localStorage.setItem('topScore', score);
+            }
+            // --- Leaderboard session storage ---
+            if (score > 0) {
+                let sessionScores = JSON.parse(sessionStorage.getItem('sessionScores') || '[]');
+                const username = localStorage.getItem('username') || 'Anonymous';
+                // Prevent duplicate push if user reloads result screen
+                if (sessionScores.length === 0 || sessionScores[sessionScores.length-1].score !== score || sessionScores[sessionScores.length-1].name !== username) {
+                    sessionScores.push({ name: username, score });
+                    sessionStorage.setItem('sessionScores', JSON.stringify(sessionScores));
+                }
+            }
         }
 
         function playAgain() {
@@ -883,6 +944,38 @@
                 mainContent.style.transition = 'opacity 0.5s cubic-bezier(.4,0,.2,1)';
                 mainContent.style.opacity = '1';
             }
+        });
+    </script>
+    <audio id="bg-music" src="music1.mp3" loop></audio>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            var music = document.getElementById('bg-music');
+            var volumeMuteBtn = document.getElementById('volumeMuteBtn');
+            music.volume = 0.2;
+            var isMuted = false;
+
+            volumeMuteBtn.addEventListener('click', function() {
+                isMuted = !isMuted;
+                music.muted = isMuted;
+                var icon = volumeMuteBtn.querySelector('img');
+                if (isMuted) {
+                    icon.src = 'volumemute.png';
+                    icon.alt = 'Muted';
+                } else {
+                    icon.src = 'volumeicon.png';
+                    icon.alt = 'Volume';
+                }
+            });
+
+            // Try to play music on page load
+            music.play().catch(function() {
+                // If autoplay is blocked, play on first user interaction
+                function startMusic() {
+                    music.play();
+                    window.removeEventListener('click', startMusic);
+                }
+                window.addEventListener('click', startMusic);
+            });
         });
     </script>
 </body>

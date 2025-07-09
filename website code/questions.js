@@ -65,6 +65,66 @@ const questionDatabase = {
             options: ["2005", "2007", "2009", "2011"],
             correctAnswer: "2007",
             difficulty: "medium"
+        },
+        {
+            question: "What is the real name of the guitarist known as Slash, famous for his work with Guns N' Roses?",
+            options: ["Saul Hudson", "Angus Young", "David Howell Evans", "Steve Hackett"],
+            correctAnswer: "Saul Hudson",
+            difficulty: "medium"
+        },
+        {
+            question: "What is the title of the debut studio album by the American rock band Nirvana, released in 1989?",
+            options: ["Bleach", "Nevermind", "In Utero", "Rarities"],
+            correctAnswer: "Bleach",
+            difficulty: "medium"
+        },
+        {
+            question: "Which plush toy gained fame as an interactive electronic pet that required feeding and care?",
+            options: ["Furby", "Tamagotchi", "Cabbage Patch Kids", "Beanie Babies"],
+            correctAnswer: "Tamagotchi",
+            difficulty: "easy"
+        },
+        {
+            question: "Which company developed and released the classic arcade game 'Space Invaders' in 1978?",
+            options: ["Atari", "Namco", "Taito", "Sega"],
+            correctAnswer: "Taito",
+            difficulty: "medium"
+        },
+        {
+            question: "In 'Stranger Things,' what is Eleven's real name?",
+            options: ["Jane Hopper", "Jane Byers", "Jane Wheeler", "Jane Ives"],
+            correctAnswer: "Jane Ives",
+            difficulty: "medium"
+        },
+        {
+            question: "What is the name of the character played by Bryan Cranston in 'Malcolm in the Middle'?",
+            options: ["Walter White", "Hal", "Tim", "Dave"],
+            correctAnswer: "Hal",
+            difficulty: "easy"
+        },
+        {
+            question: "In the game 'Metal Gear Solid,' what is the real name of the protagonist known as Solid Snake?",
+            options: ["Jack", "David", "Frank", "Roy"],
+            correctAnswer: "David",
+            difficulty: "medium"
+        },
+        {
+            question: "What British comedian and actor did singer Katy Perry marry in 2010?",
+            options: ["Sacha Baron Cohen", "Russell Brand", "Ricky Gervais", "Stephen Fry"],
+            correctAnswer: "Russell Brand",
+            difficulty: "medium"
+        },
+        {
+            question: "Which Sith Lord was Darth Sidious' master?",
+            options: ["Darth Bane", "Darth Nihilus", "Darth Plagueis", "Darth Revan"],
+            correctAnswer: "Darth Plagueis",
+            difficulty: "medium"
+        },
+        {
+            question: "What is the name of Barbie's youngest sister, who was sold as part of a set with Barbie and Ken from 1998 to 2001?",
+            options: ["Kasey", "Kelly", "Stacie", "Krissy"],
+            correctAnswer: "Krissy",
+            difficulty: "medium"
         }
     ],
     

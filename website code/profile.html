@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Brain Blast!</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fff6e0, #e0e7ff, #ffe0f7, #e0fff6);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #fff6e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background 3.2s cubic-bezier(.4,0,.2,1), background-color 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .profile-card {
+            background: rgba(255,255,255,0.85);
+            border-radius: 32px;
+            box-shadow: 0 12px 48px 0 rgba(224, 216, 212, 0.411), 0 2px 12px 0 rgba(60,60,60,0.10);
+            border: 2px solid rgba(104, 94, 94, 0.342);
+            padding: 48px 32px 36px 32px;
+            max-width: 420px;
+            width: 92vw;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInBox 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
+            font-family: 'Gavoline', sans-serif;
+            font-size: 2rem;
+            transition: background 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1), box-shadow 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes fadeInBox {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #232222, #23243a 30%, #3a2d2d 60%, #23243a 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #232222;
+        }
+        body.dark-mode .profile-card {
+            background: rgba(40,40,40,0.85);
+            color: #fff;
+            border: 2px solid rgba(80,80,80,0.25);
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .profile-username {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .profile-topscore {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        /* Sidebar and menu styles from home_page.html */
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 999;
+            transition: top 0.5s;
+        }
+        .sidebar.open + .menu-icon {
+            top: 300px;
+        }
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a, .sidebar .closebtn {
+            font-family: 'Gavoline', sans-serif !important;
+            font-weight: bold !important;
+        }
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        .change div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        .change div:nth-child(2) {
+            opacity: 0;
+        }
+        .change div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        .dark-mode .theme-toggle {
+            background-color: #464545;
+            color: white;
+        }
+        .theme-toggle.dark-mode {
+            background-color: #666666;
+            border-radius: 50%;
+        }
+        @font-face {
+            font-family: 'Gavoline';
+            src: url('fonts/GavolineDemo.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .my-button {
+            background: linear-gradient(90deg, #ffb86c, #ff6e7f, #ffb6e6, #ffb86c);
+            background-size: 300% 300%;
+            color: white;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+        @keyframes buttonGradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes fadeInButton {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        body.dark-mode .my-button {
+            background: linear-gradient(90deg, #3a3a4a, #2d2d3a, #3a2d2d, #3a3a4a);
+            background-size: 300% 300%;
+            animation: buttonGradientMove 6s ease-in-out infinite, fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
+            color: #fff;
+        }
+        .my-button:hover {
+            background: linear-gradient(90deg, #ff6e7f, #ffb86c, #ffb6e6, #ff6e7f);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
+        }
+        body.dark-mode .my-button:hover {
+            background: linear-gradient(90deg, #2d2d3a, #3a2d2d, #3a3a4a, #2d2d3a);
+            background-size: 300% 300%;
+        }
+        #username-input, label[for="username-input"] {
+            color: #111;
+        }
+        body.dark-mode #username-input, body.dark-mode label[for="username-input"] {
+            color: #fff;
+        }
+        body.dark-mode #username-input {
+            background: rgba(80,80,80,0.45);
+            border: 1.5px solid #bbb;
+            color: #fff;
+        }
+        body.dark-mode #username-input::placeholder {
+            color: #ddd;
+            opacity: 1;
+        }
+        #profile-form label[for="username-input"], #profile-form #username-input {
+            text-align: center;
+        }
+        body.dark-mode #profile-form label[for="username-input"] {
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 1px 6px #23243a99;
+        }
+        .profile-label {
+            font-family: 'Gavoline', sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #111;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        body.dark-mode .profile-label {
+            color: #fff;
+            text-shadow: 0 1px 6px #23243a99;
+        }
+        :root {
+            --profile-text-color: #232222;
+        }
+        body.dark-mode {
+            --profile-text-color: #fff;
+        }
+        .profile-card, .profile-card *:not(#username-input):not(.my-button) {
+            color: var(--profile-text-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle and Icon -->
+    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
+        <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
+    </button>
+    <!-- Hamburger Menu Icon -->
+    <div class="menu-icon" onclick="toggleMenu(this)">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="home_page.html">Home</a>
+        <a href="profile.html">Profile</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="#">Settings</a>
+        <a href="about.html">About</a>
+        <a href="#">Help</a>
+    </div>
+    <div class="profile-card">
+        <!-- Removed profile picture/avatar -->
+        <div class="profile-username" id="profile-username">Username</div>
+        <div class="profile-topscore">Top Score: <span id="top-score">---</span></div>
+        <button id="switch-user-btn" class="my-button">Switch User</button>
+        <div id="profile-form" style="margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <label for="username-input" class="profile-label">Enter your username</label>
+            <input type="text" id="username-input" placeholder="Username" style="padding: 16px 20px; border-radius: 16px; border: 1.5px solid #ccc; font-size: 1.3rem; font-family: 'Gavoline', sans-serif; background: rgba(224,231,255,0.25); box-shadow: 0 2px 8px 0 rgba(60,60,60,0.07); outline: none; margin-bottom: 0; width: 90%; max-width: 320px; transition: border-color 0.3s;">
+            <button onclick="saveUsername()" class="my-button" style="margin-left: 0; padding: 12px 36px; font-size: 1.1rem;">Save</button>
+        </div>
+    </div>
+    <script>
+        function toggleMenu(element) {
+            element.classList.toggle("change");
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.classList.toggle("open");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.querySelector('.menu-icon').classList.remove("change");
+        }
+        // Close sidebar when clicking outside
+        window.onclick = function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const menuIcon = document.querySelector('.menu-icon');
+            if (event.target !== sidebar && event.target !== menuIcon && !menuIcon.contains(event.target)) {
+                sidebar.style.width = "0";
+                menuIcon.classList.remove("change");
+            }
+        }
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'dark');
+            } else {
+                themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'light');
+            }
+        }
+        function saveUsername() {
+            const username = document.getElementById('username-input').value;
+            if (username.trim()) {
+                localStorage.setItem('username', username);
+                document.getElementById('profile-username').textContent = username;
+                document.getElementById('profile-form').style.display = 'none';
+                document.getElementById('switch-user-btn').style.display = '';
+            }
+        }
+        window.onload = function() {
+            const username = localStorage.getItem('username');
+            if (username) {
+                document.getElementById('profile-username').textContent = username;
+                document.getElementById('profile-form').style.display = 'none';
+                document.getElementById('switch-user-btn').style.display = '';
+            } else {
+                document.getElementById('switch-user-btn').style.display = 'none';
+            }
+            const topScore = localStorage.getItem('topScore') || '---';
+            document.getElementById('top-score').textContent = topScore;
+            document.getElementById('switch-user-btn').onclick = function() {
+                localStorage.removeItem('username');
+                localStorage.removeItem('topScore');
+                document.getElementById('profile-form').style.display = '';
+                document.getElementById('switch-user-btn').style.display = 'none';
+                document.getElementById('profile-username').textContent = 'Username';
+                document.getElementById('top-score').textContent = '---';
+            };
+            // Apply dark mode from localStorage
+            const darkMode = localStorage.getItem('darkMode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.classList.remove('dark-mode');
+            }
+        }
+    </script>
+</body>
+</html> 

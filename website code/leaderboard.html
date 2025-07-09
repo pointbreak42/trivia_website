@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | Brain Blast!</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fff6e0, #e0e7ff, #ffe0f7, #e0fff6);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #fff6e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background 3.2s cubic-bezier(.4,0,.2,1), background-color 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #232222, #23243a 30%, #3a2d2d 60%, #23243a 100%);
+            background-size: 400% 400%;
+            animation: gradientMove 16s ease-in-out infinite;
+            background-color: #232222;
+        }
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            z-index: 999;
+            transition: top 0.5s;
+        }
+        .sidebar.open + .menu-icon {
+            top: 300px;
+        }
+        .menu-icon div {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            margin: 5px 0;
+            transition: 0.4s;
+        }
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 60px;
+        }
+        .sidebar a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a, .sidebar .closebtn {
+            font-family: 'Gavoline', sans-serif !important;
+            font-weight: bold !important;
+        }
+        .sidebar a:hover {
+            color: #f1f1f1;
+        }
+        .sidebar .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+        }
+        .change div:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        .change div:nth-child(2) {
+            opacity: 0;
+        }
+        .change div:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        .dark-mode .theme-toggle {
+            background-color: #464545;
+            color: white;
+        }
+        .theme-toggle.dark-mode {
+            background-color: #666666;
+            border-radius: 50%;
+        }
+        @font-face {
+            font-family: 'Gavoline';
+            src: url('fonts/GavolineDemo.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        .leaderboard-placeholder {
+            background: rgba(255,255,255,0.85);
+            border-radius: 32px;
+            box-shadow: 0 12px 48px 0 rgba(224, 216, 212, 0.411), 0 2px 12px 0 rgba(60,60,60,0.10);
+            border: 2px solid rgba(104, 94, 94, 0.342);
+            padding: 64px 48px 48px 48px;
+            max-width: 420px;
+            width: 92vw;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeInBox 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
+            font-family: 'Gavoline', sans-serif;
+            font-size: 2rem;
+            margin-top: 40px;
+            transition: background 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1), box-shadow 1.2s cubic-bezier(.4,0,.2,1);
+        }
+        @keyframes fadeInBox {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        body.dark-mode .leaderboard-placeholder {
+            background: rgba(40,40,40,0.85);
+            color: #fff;
+            border: 2px solid rgba(80,80,80,0.25);
+        }
+        .leaderboard-podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 420px;
+            margin-top: 40px;
+        }
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            gap: 32px;
+        }
+        .podium-spot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .podium-name {
+            font-family: 'Gavoline', sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            min-width: 80px;
+            max-width: 120px;
+            word-break: break-word;
+            color: #23243a;
+        }
+        body.dark-mode .podium-name {
+            color: #fff;
+        }
+        .podium-box {
+            width: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            box-shadow: 0 8px 32px 0 rgba(60,60,60,0.18);
+            border-radius: 10px 10px 0 0;
+        }
+        .podium-1 .podium-box {
+            height: 200px;
+            background: linear-gradient(180deg, gold 80%, #e6c200 100%);
+            border: 3px solid gold;
+        }
+        .podium-2 .podium-box {
+            height: 140px;
+            background: linear-gradient(180deg, #bdbdbd 80%, #a0a0a0 100%);
+            border: 3px solid #bdbdbd;
+        }
+        .podium-3 .podium-box {
+            height: 90px;
+            background: linear-gradient(180deg, #cd7f32 80%, #a05a2c 100%);
+            border: 3px solid #cd7f32;
+        }
+        .podium-pts {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            color: #23243a;
+        }
+        .podium-rank {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2.5px solid #23243a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.7rem;
+            font-weight: bold;
+            background: #fff;
+            color: #23243a;
+            position: absolute;
+            left: 50%;
+            bottom: -22px;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 2px 8px 0 rgba(60,60,60,0.10);
+        }
+        .podium-1 .podium-rank { border-color: gold; color: gold; }
+        .podium-2 .podium-rank { border-color: #bdbdbd; color: #bdbdbd; }
+        .podium-3 .podium-rank { border-color: #cd7f32; color: #cd7f32; }
+        .podium-1 .podium-pts { color: #bfa100; }
+        .podium-2 .podium-pts { color: #888; }
+        .podium-3 .podium-pts { color: #a05a2c; }
+        body.dark-mode .podium-box {
+            filter: brightness(0.85);
+        }
+        body.dark-mode .podium-rank {
+            background: #23243a;
+            color: #fff;
+        }
+        body.dark-mode .podium-1 .podium-rank { border-color: gold; color: gold; }
+        body.dark-mode .podium-2 .podium-rank { border-color: #bdbdbd; color: #bdbdbd; }
+        body.dark-mode .podium-3 .podium-rank { border-color: #cd7f32; color: #cd7f32; }
+        body.dark-mode .podium-1 .podium-pts { color: #ffe066; }
+        body.dark-mode .podium-2 .podium-pts { color: #ccc; }
+        body.dark-mode .podium-3 .podium-pts { color: #e0a96d; }
+        .leaderboard-visual-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 32px;
+        }
+        .podium-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 48px;
+            margin-bottom: 36px;
+        }
+        .podium-spot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        .podium-rank-top {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .crown {
+            font-size: 2.1rem;
+            color: gold;
+            margin-bottom: 0;
+        }
+        .podium-avatar {
+            font-size: 3.2rem;
+            margin-bottom: 6px;
+        }
+        .podium-1 .podium-avatar { font-size: 3.7rem; }
+        .podium-name {
+            font-family: 'Gavoline', sans-serif;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+            color: #23243a;
+            text-align: center;
+            max-width: 120px;
+            word-break: break-word;
+        }
+        .podium-score {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #bfa100;
+            margin-bottom: 2px;
+        }
+        .podium-2 .podium-score { color: #888; }
+        .podium-3 .podium-score { color: #a05a2c; }
+        body.dark-mode .podium-name { color: #fff; }
+        .leaderboard-list {
+            width: 420px;
+            max-width: 95vw;
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .leaderboard-list-row {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.85);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px 0 rgba(60,60,60,0.07);
+            padding: 10px 18px;
+            font-family: 'Gavoline', sans-serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            gap: 18px;
+        }
+        .list-rank {
+            font-size: 1.3rem;
+            width: 32px;
+            text-align: right;
+        }
+        .list-rank.medal-1 { color: gold; }
+        .list-rank.medal-2 { color: #888; }
+        .list-rank.medal-3 { color: #a05a2c; }
+        .list-name {
+            flex: 1;
+            color: #23243a;
+            font-size: 1.2rem;
+        }
+        .list-score {
+            min-width: 60px;
+            text-align: right;
+            color: #bfa100;
+        }
+        .leaderboard-list-row:nth-child(2) .list-score { color: #888; }
+        .leaderboard-list-row:nth-child(3) .list-score { color: #a05a2c; }
+        body.dark-mode .leaderboard-list-row { background: rgba(40,40,40,0.92); }
+        body.dark-mode .list-name { color: #fff; }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle and Icon -->
+    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
+        <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
+    </button>
+    <!-- Hamburger Menu Icon -->
+    <div class="menu-icon" onclick="toggleMenu(this)">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="home_page.html">Home</a>
+        <a href="profile.html">Profile</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="#">Settings</a>
+        <a href="about.html">About</a>
+        <a href="#">Help</a>
+    </div>
+    <div class="leaderboard-visual-container">
+        <div class="podium">
+            <div class="podium-spot" id="podium-2">
+                <span class="podium-medal" id="podium-medal-2">🥈</span>
+                <span class="podium-name" id="podium-name-2"></span>
+                <span class="podium-score" id="podium-score-2"></span>
+            </div>
+            <div class="podium-spot" id="podium-1">
+                <span class="podium-medal" id="podium-medal-1">🥇</span>
+                <span class="podium-name" id="podium-name-1"></span>
+                <span class="podium-score" id="podium-score-1"></span>
+            </div>
+            <div class="podium-spot" id="podium-3">
+                <span class="podium-medal" id="podium-medal-3">🥉</span>
+                <span class="podium-name" id="podium-name-3"></span>
+                <span class="podium-score" id="podium-score-3"></span>
+            </div>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-list"></div>
+        <div class="no-scores-message" id="no-scores-message" style="display:none; text-align:center; font-size:1.2rem; color:#888; margin-top:32px; font-family: 'Gavoline', sans-serif;">No scores yet this session.</div>
+    </div>
+    <script>
+        function toggleMenu(element) {
+            element.classList.toggle("change");
+            const sidebar = document.getElementById("mySidebar");
+            sidebar.classList.toggle("open");
+            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+        }
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.querySelector('.menu-icon').classList.remove("change");
+        }
+        // Close sidebar when clicking outside
+        window.onclick = function(event) {
+            const sidebar = document.getElementById("mySidebar");
+            const menuIcon = document.querySelector('.menu-icon');
+            if (event.target !== sidebar && event.target !== menuIcon && !menuIcon.contains(event.target)) {
+                sidebar.style.width = "0";
+                menuIcon.classList.remove("change");
+            }
+        }
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (document.body.classList.contains('dark-mode')) {
+                themeToggle.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'dark');
+            } else {
+                themeToggle.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'light');
+            }
+        }
+        // Leaderboard logic
+        function renderLeaderboard() {
+            let scores = JSON.parse(sessionStorage.getItem('sessionScores') || '[]');
+            // Migrate old number-only entries to {name, score} objects
+            scores = scores.map(s => (typeof s === 'number' ? { name: 'Anonymous', score: s } : s));
+            sessionStorage.setItem('sessionScores', JSON.stringify(scores));
+            scores = scores.sort((a, b) => b.score - a.score).slice(0, 10);
+            // Podium: 1st (center) = scores[0], 2nd (left) = scores[1], 3rd (right) = scores[2]
+            const podium = [scores[0], scores[1], scores[2]];
+            [1,2,3].forEach((rank, i) => {
+                const entry = podium[i];
+                document.getElementById(`podium-name-${rank}`).textContent = entry ? entry.name : '';
+                document.getElementById(`podium-score-${rank}`).textContent = entry ? entry.score + ' pts' : '';
+                document.getElementById(`podium-medal-${rank}`).style.display = (entry ? '' : 'none');
+            });
+            // List
+            const listDiv = document.getElementById('leaderboard-list');
+            const noScoresMsg = document.getElementById('no-scores-message');
+            if (scores.length === 0) {
+                listDiv.style.display = 'none';
+                noScoresMsg.style.display = 'block';
+            } else {
+                listDiv.style.display = '';
+                noScoresMsg.style.display = 'none';
+                listDiv.innerHTML = '';
+                const medals = ['🥇','🥈','🥉'];
+                for (let i = 0; i < scores.length; i++) {
+                    const entry = scores[i];
+                    const medalClass = i < 3 ? `medal-${i+1}` : '';
+                    const medal = i < 3 ? medals[i] : (i+1);
+                    listDiv.innerHTML += `<div class='leaderboard-list-row'><span class='list-rank ${medalClass}'>${medal}</span><span class='list-name'>${entry.name}</span><span class='list-score'>${entry.score}</span></div>`;
+                }
+            }
+        }
+        window.onload = function() {
+            // Apply dark mode from localStorage
+            const darkMode = localStorage.getItem('darkMode');
+            const themeToggle = document.getElementById('themeToggle');
+            if (darkMode === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggle.classList.remove('dark-mode');
+            }
+            renderLeaderboard();
+        }
+        // Listen for storage changes in this tab (if user plays game and returns)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'sessionScores') renderLeaderboard();
+        });
+    </script>
+</body>
+</html> 
