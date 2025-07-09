@@ -516,6 +516,18 @@
     <!-- Add curtain element -->
     <div class="curtain" id="curtain"></div>
     
+    <!-- Custom Audio Elements for Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="sounds/correct.mp3" type="audio/mpeg">
+        <source src="sounds/correct.wav" type="audio/wav">
+        <source src="sounds/correct.ogg" type="audio/ogg">
+    </audio>
+    <audio id="incorrectSound" preload="auto">
+        <source src="sounds/incorrect.mp3" type="audio/mpeg">
+        <source src="sounds/incorrect.wav" type="audio/wav">
+        <source src="sounds/incorrect.ogg" type="audio/ogg">
+    </audio>
+    
     <!-- Dark Mode Toggle and Icon -->
     <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
         <img src="darkmodeicon.png" alt="Toggle Dark Mode" style="width: 24px; height: 24px;">
@@ -557,6 +569,8 @@
     </div>
     </div>
 
+    <!-- Include sound effects -->
+    <script src="sounds.js"></script>
     <script>
         // --- Question Pool (embedded) ---
         const questionPool = {
@@ -704,39 +718,53 @@
             startTimer();
         }
 
-        function selectAnswer(idx) {
-            if (answered) return;
-            answered = true;
-            clearTimer();
-            const qObj = currentQuestions[currentIndex];
-            const allBtns = answersDiv.querySelectorAll('button');
-            const shuffledOptions = qObj._shuffledOptions;
-            // Mark which option was answered for result calculation
-            shuffledOptions[idx].answered = true;
-            allBtns.forEach((btn, i) => {
-                btn.disabled = true;
-                if (shuffledOptions[i].isCorrect) {
-                    btn.style.background = 'linear-gradient(90deg, #4caf50, #43e97b)';
-                    btn.style.color = '#fff';
-                    btn.classList.add('correct-animate');
-                    setTimeout(() => btn.classList.remove('correct-animate'), 350);
-                }
-                if (i === idx && !shuffledOptions[i].isCorrect) {
-                    btn.style.background = 'linear-gradient(90deg, #e45467, #d32d2d)';
-                    btn.style.color = '#fff';
-                }
-            });
-            if (shuffledOptions[idx].isCorrect) {
-                score += questionScore; // Add time-based score
-                // Update score display immediately
-                const scoreDisplay = document.getElementById('score-display');
-                scoreDisplay.textContent = `Score: ${score}`;
-            }
-            setTimeout(() => {
-                currentIndex++;
-                renderQuestion();
-            }, 900);
-        }
+                 function selectAnswer(idx) {
+             if (answered) return;
+             answered = true;
+             clearTimer();
+             const qObj = currentQuestions[currentIndex];
+             const allBtns = answersDiv.querySelectorAll('button');
+             const shuffledOptions = qObj._shuffledOptions;
+             // Mark which option was answered for result calculation
+             shuffledOptions[idx].answered = true;
+             
+             // Play sound effect based on answer
+             const correctSound = document.getElementById('correctSound');
+             const incorrectSound = document.getElementById('incorrectSound');
+             
+             allBtns.forEach((btn, i) => {
+                 btn.disabled = true;
+                 if (shuffledOptions[i].isCorrect) {
+                     btn.style.background = 'linear-gradient(90deg, #4caf50, #43e97b)';
+                     btn.style.color = '#fff';
+                     btn.classList.add('correct-animate');
+                     setTimeout(() => btn.classList.remove('correct-animate'), 350);
+                 }
+                 if (i === idx && !shuffledOptions[i].isCorrect) {
+                     btn.style.background = 'linear-gradient(90deg, #e45467, #d32d2d)';
+                     btn.style.color = '#fff';
+                 }
+             });
+             
+             if (shuffledOptions[idx].isCorrect) {
+                 // Play correct sound
+                 correctSound.currentTime = 0;
+                 correctSound.play().catch(e => console.log('Audio play failed:', e));
+                 score += questionScore; // Add time-based score
+                 // Update score display immediately
+                 const scoreDisplay = document.getElementById('score-display');
+                 scoreDisplay.textContent = `Score: ${score}`;
+             } else {
+                 // Play incorrect sound
+                 incorrectSound.currentTime = 0;
+                 incorrectSound.play().catch(e => console.log('Audio play failed:', e));
+             }
+             
+             setTimeout(() => {
+                 currentIndex++;
+                 renderQuestion();
+             }, 900);
+         }
 
         function skipQuestion(auto = false) {
             if (answered) return;
