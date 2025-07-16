@@ -16,56 +16,36 @@ class SoundEffects {
         }
     }
 
-    // Generate a pleasant "ding" sound for correct answers
+    // Generate a short, high-pitched chime for correct answers
     playCorrectSound() {
         if (!this.audioContext) return;
-        
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
-        
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        
-        // Create a pleasant ascending tone
-        oscillator.frequency.setValueAtTime(523.25, this.audioContext.currentTime); // C5
-        oscillator.frequency.exponentialRampToValueAtTime(659.25, this.audioContext.currentTime + 0.1); // E5
-        oscillator.frequency.exponentialRampToValueAtTime(783.99, this.audioContext.currentTime + 0.2); // G5
-        
-        oscillator.type = 'sine';
-        
-        // Fade in and out
-        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-        
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(1200, this.audioContext.currentTime); // High pitch
+        gainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.18, this.audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.18);
         oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.3);
+        oscillator.stop(this.audioContext.currentTime + 0.18);
     }
 
-    // Generate a "buzz" sound for incorrect answers
+    // Generate a short, low-pitched buzzer for incorrect answers
     playIncorrectSound() {
         if (!this.audioContext) return;
-        
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
-        
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        
-        // Create a descending "wrong" tone
-        oscillator.frequency.setValueAtTime(220, this.audioContext.currentTime); // A3
-        oscillator.frequency.exponentialRampToValueAtTime(196, this.audioContext.currentTime + 0.1); // G3
-        oscillator.frequency.exponentialRampToValueAtTime(174.61, this.audioContext.currentTime + 0.2); // F3
-        
-        oscillator.type = 'sawtooth'; // More harsh sound for wrong answers
-        
-        // Fade in and out
-        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.2, this.audioContext.currentTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
-        
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(110, this.audioContext.currentTime); // Low pitch
+        gainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.22, this.audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.22);
         oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.4);
+        oscillator.stop(this.audioContext.currentTime + 0.22);
     }
 
     // Generate a "pop" sound for button clicks (optional)

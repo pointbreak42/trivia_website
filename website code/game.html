@@ -524,18 +524,6 @@
     <!-- Add curtain element -->
     <div class="curtain" id="curtain"></div>
     
-    <!-- Custom Audio Elements for Sound Effects -->
-    <audio id="correctSound" preload="auto">
-        <source src="sounds/correct.mp3" type="audio/mpeg">
-        <source src="sounds/correct.wav" type="audio/wav">
-        <source src="sounds/correct.ogg" type="audio/ogg">
-    </audio>
-    <audio id="incorrectSound" preload="auto">
-        <source src="sounds/incorrect.mp3" type="audio/mpeg">
-        <source src="sounds/incorrect.wav" type="audio/wav">
-        <source src="sounds/incorrect.ogg" type="audio/ogg">
-    </audio>
-    
     <!-- Dark Mode Toggle and Volume Button -->
     <div id="top-right-controls"
       style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 9999; align-items: center;">
@@ -588,6 +576,36 @@
     <!-- Include sound effects -->
     <script src="sounds.js"></script>
     <script>
+        // --- Web Audio API Sound Effects ---
+        function playCorrectSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(880, ctx.currentTime);
+            o.frequency.linearRampToValueAtTime(1760, ctx.currentTime + 0.18);
+            g.gain.setValueAtTime(0.18, ctx.currentTime);
+            g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
+            o.connect(g).connect(ctx.destination);
+            o.start();
+            o.stop(ctx.currentTime + 0.2);
+            o.onended = () => ctx.close();
+        }
+        function playIncorrectSound() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(220, ctx.currentTime);
+            o.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.25);
+            g.gain.setValueAtTime(0.18, ctx.currentTime);
+            g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
+            o.connect(g).connect(ctx.destination);
+            o.start();
+            o.stop(ctx.currentTime + 0.25);
+            o.onended = () => ctx.close();
+        }
+
         // --- Question Pool (embedded) ---
         const questionPool = {
             'pop-culture': [
@@ -768,10 +786,6 @@
              // Mark which option was answered for result calculation
              shuffledOptions[idx].answered = true;
              
-             // Play sound effect based on answer
-             const correctSound = document.getElementById('correctSound');
-             const incorrectSound = document.getElementById('incorrectSound');
-             
              const isDark = document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
              allBtns.forEach((btn, i) => {
                  btn.disabled = true;
@@ -793,17 +807,13 @@
              });
              
              if (shuffledOptions[idx].isCorrect) {
-                 // Play correct sound
-                 correctSound.currentTime = 0;
-                 correctSound.play().catch(e => console.log('Audio play failed:', e));
+                 playCorrectSound();
                  score += questionScore; // Add time-based score
                  // Update score display immediately
                  const scoreDisplay = document.getElementById('score-display');
                  scoreDisplay.textContent = `Score: ${score}`;
              } else {
-                 // Play incorrect sound
-                 incorrectSound.currentTime = 0;
-                 incorrectSound.play().catch(e => console.log('Audio play failed:', e));
+                 playIncorrectSound();
              }
              
              setTimeout(() => {
@@ -946,7 +956,8 @@
             }
         });
     </script>
-    <audio id="bg-music" src="music1.mp3" loop></audio>
+     <audio id="bg-music" src="music1.mp3" loop></audio> 
+    
     <script>
         window.addEventListener('DOMContentLoaded', function() {
             var music = document.getElementById('bg-music');
@@ -978,5 +989,6 @@
             });
         });
     </script>
+    
 </body>
 </html>
