@@ -248,8 +248,49 @@
         body.dark-mode {
             --profile-text-color: #fff;
         }
-        .profile-card, .profile-card *:not(#username-input):not(.my-button) {
+        .profile-card, .profile-card *:not(#username-input):not(.my-button):not(.my-animated-button) {
             color: var(--profile-text-color) !important;
+        }
+        .my-animated-button {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            color: white !important;
+            padding: 24px 48px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Gavoline', sans-serif;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            transition: background 0.5s cubic-bezier(.4,0,.2,1), color 0.5s cubic-bezier(.4,0,.2,1), box-shadow 0.5s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 16px 0 rgba(255, 110, 127, 0.12);
+        }
+        @keyframes fadeInButton {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes buttonGradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body.dark-mode .my-animated-button {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+            background-size: 300% 300%;
+            animation: fadeInButton 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards, buttonGradientMove 6s ease-in-out 0s infinite;
+            color: #fff;
+        }
+        body.dark-mode .my-animated-button:hover {
+            background: linear-gradient(90deg, #0f175e, #121231, #0d1633, #0c0429);
+            background-size: 300% 300%;
+        }
+        .my-animated-button:hover {
+            background: linear-gradient(90deg, #e45467, #d32d2d, #ee8128, #f1c241);
+            background-size: 300% 300%;
+            box-shadow: 0 8px 32px 0 rgba(255, 110, 127, 0.18);
         }
     </style>
 </head>
@@ -267,12 +308,12 @@
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a href="index.html">Home</a>
+        <a href="home_page.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="leaderboard.html">Leaderboard</a>
-        <a href="#">Settings</a>
+        <a href="settings.html">Settings</a>
         <a href="about.html">About</a>
-        <a href="#">Help</a>
+        <a href="help.html">Help</a>
     </div>
     <div class="profile-card">
         <!-- Removed profile picture/avatar -->
@@ -282,15 +323,20 @@
         <div id="profile-form" style="margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
             <label for="username-input" class="profile-label">Enter your username</label>
             <input type="text" id="username-input" placeholder="Username" style="padding: 16px 20px; border-radius: 16px; border: 1.5px solid #ccc; font-size: 1.3rem; font-family: 'Gavoline', sans-serif; background: rgba(224,231,255,0.25); box-shadow: 0 2px 8px 0 rgba(60,60,60,0.07); outline: none; margin-bottom: 0; width: 90%; max-width: 320px; transition: border-color 0.3s;">
-            <button onclick="saveUsername()" class="my-button" style="margin-left: 0; padding: 12px 36px; font-size: 1.1rem;">Save</button>
+            <button onclick="saveUsername()" class="my-animated-button">Save</button>
         </div>
     </div>
     <script>
         function toggleMenu(element) {
             element.classList.toggle("change");
             const sidebar = document.getElementById("mySidebar");
-            sidebar.classList.toggle("open");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+                sidebar.classList.remove("open");
+            } else {
+                sidebar.style.width = "250px";
+                sidebar.classList.add("open");
+            }
         }
         function closeNav() {
             document.getElementById("mySidebar").style.width = "0";

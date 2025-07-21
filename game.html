@@ -524,6 +524,18 @@
     <!-- Add curtain element -->
     <div class="curtain" id="curtain"></div>
     
+    <!-- Custom Audio Elements for Sound Effects -->
+    <audio id="correctSound" preload="auto">
+        <source src="sounds/correct.mp3" type="audio/mpeg">
+        <source src="sounds/correct.wav" type="audio/wav">
+        <source src="sounds/correct.ogg" type="audio/ogg">
+    </audio>
+    <audio id="incorrectSound" preload="auto">
+        <source src="sounds/incorrect.mp3" type="audio/mpeg">
+        <source src="sounds/incorrect.wav" type="audio/wav">
+        <source src="sounds/incorrect.ogg" type="audio/ogg">
+    </audio>
+    
     <!-- Dark Mode Toggle and Volume Button -->
     <div id="top-right-controls"
       style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 9999; align-items: center;">
@@ -542,16 +554,15 @@
         <div></div>
         <div></div>
     </div>
-
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a href="index.html">Home</a>
+        <a href="home_page.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="leaderboard.html">Leaderboard</a>
-        <a href="#">Settings</a>
+        <a href="settings.html">Settings</a>
         <a href="about.html">About</a>
-        <a href="#">Help</a>
+        <a href="help.html">Help</a>
     </div>
 
     <!-- Trivia Game Container -->
@@ -576,36 +587,6 @@
     <!-- Include sound effects -->
     <script src="sounds.js"></script>
     <script>
-        // --- Web Audio API Sound Effects ---
-        function playCorrectSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.type = 'triangle';
-            o.frequency.setValueAtTime(880, ctx.currentTime);
-            o.frequency.linearRampToValueAtTime(1760, ctx.currentTime + 0.18);
-            g.gain.setValueAtTime(0.18, ctx.currentTime);
-            g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
-            o.connect(g).connect(ctx.destination);
-            o.start();
-            o.stop(ctx.currentTime + 0.2);
-            o.onended = () => ctx.close();
-        }
-        function playIncorrectSound() {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.type = 'sawtooth';
-            o.frequency.setValueAtTime(220, ctx.currentTime);
-            o.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.25);
-            g.gain.setValueAtTime(0.18, ctx.currentTime);
-            g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.25);
-            o.connect(g).connect(ctx.destination);
-            o.start();
-            o.stop(ctx.currentTime + 0.25);
-            o.onended = () => ctx.close();
-        }
-
         // --- Question Pool (embedded) ---
         const questionPool = {
             'pop-culture': [
@@ -786,6 +767,10 @@
              // Mark which option was answered for result calculation
              shuffledOptions[idx].answered = true;
              
+             // Play sound effect based on answer
+             const correctSound = document.getElementById('correctSound');
+             const incorrectSound = document.getElementById('incorrectSound');
+             
              const isDark = document.body.classList.contains('dark-mode') || document.documentElement.classList.contains('dark-mode');
              allBtns.forEach((btn, i) => {
                  btn.disabled = true;
@@ -807,13 +792,17 @@
              });
              
              if (shuffledOptions[idx].isCorrect) {
-                 playCorrectSound();
+                 // Play correct sound
+                 correctSound.currentTime = 0;
+                 correctSound.play().catch(e => console.log('Audio play failed:', e));
                  score += questionScore; // Add time-based score
                  // Update score display immediately
                  const scoreDisplay = document.getElementById('score-display');
                  scoreDisplay.textContent = `Score: ${score}`;
              } else {
-                 playIncorrectSound();
+                 // Play incorrect sound
+                 incorrectSound.currentTime = 0;
+                 incorrectSound.play().catch(e => console.log('Audio play failed:', e));
              }
              
              setTimeout(() => {
@@ -885,7 +874,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html';
+            window.location.href = 'home_page.html';
         }
 
         // --- Dark Mode Toggle (copied from home_page.html, with persistence) ---
@@ -905,8 +894,13 @@
         function toggleMenu(element) {
             element.classList.toggle("change");
             const sidebar = document.getElementById("mySidebar");
-            sidebar.classList.toggle("open");
-            sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+                sidebar.classList.remove("open");
+            } else {
+                sidebar.style.width = "250px";
+                sidebar.classList.add("open");
+            }
         }
 
         function closeNav() {
@@ -956,8 +950,7 @@
             }
         });
     </script>
-     <audio id="bg-music" src="music1.mp3" loop></audio> 
-    
+    <audio id="bg-music" src="music1.mp3" loop></audio>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
             var music = document.getElementById('bg-music');
@@ -965,30 +958,51 @@
             music.volume = 0.2;
             var isMuted = false;
 
-            volumeMuteBtn.addEventListener('click', function() {
-                isMuted = !isMuted;
-                music.muted = isMuted;
-                var icon = volumeMuteBtn.querySelector('img');
-                if (isMuted) {
-                    icon.src = 'volumemute.png';
-                    icon.alt = 'Muted';
+            // Music setting from localStorage
+            function applyMusicSetting() {
+                var musicEnabled = localStorage.getItem('musicEnabled');
+                if (musicEnabled === 'false') {
+                    music.pause();
+                    music.muted = true;
                 } else {
-                    icon.src = 'volumeicon.png';
-                    icon.alt = 'Volume';
+                    music.muted = false;
+                    // Only play if not already playing
+                    if (music.paused) {
+                        music.play().catch(function() {
+                            // If autoplay is blocked, play on first user interaction
+                            function startMusic() {
+                                music.play();
+                                window.removeEventListener('click', startMusic);
+                            }
+                            window.addEventListener('click', startMusic);
+                        });
+                    }
+                }
+            }
+            applyMusicSetting();
+
+            // Listen for changes to musicEnabled in localStorage (from settings page)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'musicEnabled') {
+                    applyMusicSetting();
                 }
             });
 
-            // Try to play music on page load
-            music.play().catch(function() {
-                // If autoplay is blocked, play on first user interaction
-                function startMusic() {
-                    music.play();
-                    window.removeEventListener('click', startMusic);
-                }
-                window.addEventListener('click', startMusic);
-            });
+            if (volumeMuteBtn) {
+                volumeMuteBtn.addEventListener('click', function() {
+                    isMuted = !isMuted;
+                    music.muted = isMuted;
+                    var icon = volumeMuteBtn.querySelector('img');
+                    if (isMuted) {
+                        icon.src = 'volumemute.png';
+                        icon.alt = 'Muted';
+                    } else {
+                        icon.src = 'volumeicon.png';
+                        icon.alt = 'Volume';
+                    }
+                });
+            }
         });
     </script>
-    
 </body>
 </html>
