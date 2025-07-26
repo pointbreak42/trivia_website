@@ -129,7 +129,7 @@ const questionDatabase = {
     ],
     
     // You can add more categories here
-    science: [
+    "science": [
         {
             question: "What is the chemical symbol for gold?",
             options: ["Ag", "Au", "Fe", "Cu"],

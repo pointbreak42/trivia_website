@@ -8,16 +8,17 @@
     <style>
         body {
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             background: linear-gradient(135deg, #fff6e0, #e0e7ff, #ffe0f7, #e0fff6);
             background-size: 400% 400%;
             animation: gradientMove 16s ease-in-out infinite;
             background-color: #fff6e0;
             transition: background 1.2s cubic-bezier(.4,0,.2,1), background-color 1.2s cubic-bezier(.4,0,.2,1);
+            padding: 20px 0;
         }
         body.dark-mode {
             background: linear-gradient(135deg, #232222, #23243a 30%, #3a2d2d 60%, #23243a 100%);
@@ -124,11 +125,13 @@
             font-family: 'Gavoline', sans-serif;
             font-size: 1.5rem;
             color: #23243a;
-            min-width: 320px;
-            min-height: 200px;
+            width: 90%;
+            max-width: 800px;
             animation: fadeInBox 1.2s cubic-bezier(.23,1.01,.32,1) 0.2s forwards;
             opacity: 0;
             transition: background 1.2s cubic-bezier(.4,0,.2,1), color 1.2s cubic-bezier(.4,0,.2,1), box-shadow 1.2s cubic-bezier(.4,0,.2,1);
+            box-sizing: border-box;
+            margin-bottom: 40px;
         }
         body.dark-mode .help-content {
             background: rgba(40,40,40,0.85);
@@ -186,6 +189,33 @@
         .help-content ol, .help-content ul, .help-content li {
             line-height: 1.7;
         }
+        
+        .help-content section {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .help-content h3 {
+            margin-bottom: 20px;
+        }
+        
+        .help-content ol, .help-content ul {
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        
+        @media (max-width: 768px) {
+            .help-content {
+                width: 95%;
+                padding: 30px 20px;
+                font-size: 1.2rem;
+            }
+            
+            .help-content ol, .help-content ul {
+                padding-left: 15px;
+            }
+        }
     </style>
     <script>
       (function() {
@@ -211,7 +241,7 @@
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a href="home_page.html">Home</a>
+        <a href="index.html">Home</a>
         <a href="profile.html">Profile</a>
         <a href="leaderboard.html">Leaderboard</a>
         <a href="settings.html">Settings</a>
@@ -226,7 +256,7 @@
         </div>
         <section id="howToPlaySection" style="display:none; animation: fadeInBox 0.7s cubic-bezier(.23,1.01,.32,1); text-align: center;">
             <h3>How to Play</h3>
-            <ol style="text-align: left; max-width: 600px; margin: 0 auto;">
+            <ol style="text-align: left; max-width: 100%; margin: 0 auto; padding-left: 20px; word-wrap: break-word;">
                 <li>Click <b>Play</b> on the home page to start a new trivia game.</li>
                 <li>Choose your category (if available) and answer each question by clicking the correct option.</li>
                 <li>Each game consists of 5 questions. Try to answer as many as you can correctly!</li>
@@ -236,7 +266,7 @@
         </section>
         <section id="featureOverviewSection" style="display:none; animation: fadeInBox 0.7s cubic-bezier(.23,1.01,.32,1); text-align: center;">
             <h3>Feature Overview</h3>
-            <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+            <ul style="text-align: left; max-width: 100%; margin: 0 auto; padding-left: 20px; word-wrap: break-word;">
                 <li><b>Home:</b> Start a new game and access main navigation.</li>
                 <li><b>Profile:</b> View your username and top score.</li>
                 <li><b>Leaderboard:</b> See the top scores and compete with others.</li>
@@ -287,21 +317,24 @@
                 document.body.classList.remove('dark-mode');
                 themeToggle.classList.remove('dark-mode');
             }
-        }
-        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Set up help page button functionality
             const howToPlayBtn = document.getElementById('howToPlayBtn');
             const featureOverviewBtn = document.getElementById('featureOverviewBtn');
             const howToPlaySection = document.getElementById('howToPlaySection');
             const featureOverviewSection = document.getElementById('featureOverviewSection');
-            howToPlayBtn.onclick = function() {
-                howToPlaySection.style.display = 'block';
-                featureOverviewSection.style.display = 'none';
-            };
-            featureOverviewBtn.onclick = function() {
-                featureOverviewSection.style.display = 'block';
-                howToPlaySection.style.display = 'none';
-            };
-        });
+            
+            if (howToPlayBtn && featureOverviewBtn && howToPlaySection && featureOverviewSection) {
+                howToPlayBtn.onclick = function() {
+                    howToPlaySection.style.display = 'block';
+                    featureOverviewSection.style.display = 'none';
+                };
+                featureOverviewBtn.onclick = function() {
+                    featureOverviewSection.style.display = 'block';
+                    howToPlaySection.style.display = 'none';
+                };
+            }
+        }
     </script>
 </body>
 </html> 
